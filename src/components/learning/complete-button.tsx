@@ -1,9 +1,10 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { completeLesson } from '@/features/learning/actions'
 import type { ActionResult } from '@/features/learning/actions'
+import { RewardToast } from '@/components/gamification/reward-toast'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -17,8 +18,16 @@ interface CompleteButtonProps {
 const initialState: ActionResult | null = null
 
 export function CompleteButton({ lessonId, isCompleted }: CompleteButtonProps) {
+  const [xpEarned, setXpEarned] = useState(0)
+
   const [state, dispatch, isPending] = useActionState(
-    (_prev: ActionResult | null) => completeLesson(lessonId),
+    async (_prev: ActionResult | null) => {
+      const result = await completeLesson(lessonId)
+      if (result.ok && result.xpEarned > 0) {
+        setXpEarned(result.xpEarned)
+      }
+      return result
+    },
     initialState,
   )
 
@@ -27,44 +36,50 @@ export function CompleteButton({ lessonId, isCompleted }: CompleteButtonProps) {
 
   if (completed) {
     return (
-      <div
-        role="status"
-        aria-live="polite"
-        className="inline-flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-5 py-2.5 text-sm font-semibold text-success"
-      >
-        <CheckCircle2 className="size-4 shrink-0" aria-hidden />
-        Aula concluída
-      </div>
+      <>
+        <div
+          role="status"
+          aria-live="polite"
+          className="inline-flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-5 py-2.5 text-sm font-semibold text-success"
+        >
+          <CheckCircle2 className="size-4 shrink-0" aria-hidden />
+          Aula concluída
+        </div>
+        <RewardToast xpEarned={xpEarned} onDismiss={() => setXpEarned(0)} />
+      </>
     )
   }
 
   const errorMessage = state?.ok === false ? state.error : null
 
   return (
-    <div className="flex flex-col items-start gap-2">
-      <form action={dispatch}>
-        <button
-          type="submit"
-          disabled={isPending}
-          aria-disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-focus disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-              Concluindo…
-            </>
-          ) : (
-            'Concluir aula'
-          )}
-        </button>
-      </form>
+    <>
+      <div className="flex flex-col items-start gap-2">
+        <form action={dispatch}>
+          <button
+            type="submit"
+            disabled={isPending}
+            aria-disabled={isPending}
+            className="inline-flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-focus disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+                Concluindo…
+              </>
+            ) : (
+              'Concluir aula'
+            )}
+          </button>
+        </form>
 
-      {errorMessage && (
-        <p role="alert" className="text-xs text-error">
-          {errorMessage}
-        </p>
-      )}
-    </div>
+        {errorMessage && (
+          <p role="alert" className="text-xs text-error">
+            {errorMessage}
+          </p>
+        )}
+      </div>
+      <RewardToast xpEarned={xpEarned} onDismiss={() => setXpEarned(0)} />
+    </>
   )
 }

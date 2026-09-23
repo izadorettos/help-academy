@@ -3,6 +3,7 @@
 import { CheckCircle2, XCircle, RotateCcw, Loader2 } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { Card } from '@/components/ui/card'
+import { RewardToast } from '@/components/gamification/reward-toast'
 import { completeLesson } from '@/features/learning/actions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -13,6 +14,7 @@ export interface QuizResultData {
   correctCount: number
   totalQuestions: number
   passingScore: number
+  xpEarned?: number
 }
 
 interface QuizResultProps {
@@ -26,12 +28,20 @@ interface QuizResultProps {
 export function QuizResult({ result, lessonId, onRetry }: QuizResultProps) {
   const [isPending, startTransition] = useTransition()
   const [lessonConcluded, setLessonConcluded] = useState(false)
+  const [toastXp, setToastXp] = useState(0)
 
   const { score, passed, correctCount, totalQuestions, passingScore } = result
 
+  // XP from quiz submission (passed in via result.xpEarned)
+  // Additional XP from explicit "Concluir aula" button is accumulated here
+  const quizXp = result.xpEarned ?? 0
+
   function handleConcluir() {
     startTransition(async () => {
-      await completeLesson(lessonId)
+      const res = await completeLesson(lessonId)
+      if (res.ok && res.xpEarned > 0) {
+        setToastXp(res.xpEarned)
+      }
       setLessonConcluded(true)
     })
   }
@@ -39,23 +49,29 @@ export function QuizResult({ result, lessonId, onRetry }: QuizResultProps) {
   // Show "Aula concluída" after the user clicks "Concluir aula" successfully
   if (lessonConcluded) {
     return (
-      <Card className="p-6">
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex flex-col items-center gap-3 text-center"
-        >
-          <CheckCircle2 className="size-14 text-success" aria-hidden />
-          <p className="text-xl font-bold text-success">Aula concluída</p>
-          <p className="text-sm text-text-muted">
-            Parabéns! Você concluiu esta aula com {score}%.
-          </p>
-        </div>
-      </Card>
+      <>
+        <Card className="p-6">
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex flex-col items-center gap-3 text-center"
+          >
+            <CheckCircle2 className="size-14 text-success" aria-hidden />
+            <p className="text-xl font-bold text-success">Aula concluída</p>
+            <p className="text-sm text-text-muted">
+              Parabéns! Você concluiu esta aula com {score}%.
+            </p>
+          </div>
+        </Card>
+        <RewardToast xpEarned={toastXp} onDismiss={() => setToastXp(0)} />
+      </>
     )
   }
 
   return (
+    <>
+    {/* Show XP toast when quiz was submitted and XP was earned (auto-complete on pass) */}
+    <RewardToast xpEarned={quizXp} />
     <Card className="p-6 space-y-5">
       {/* Status icon + score */}
       <div className="flex flex-col items-center gap-3 text-center">
@@ -127,5 +143,6 @@ export function QuizResult({ result, lessonId, onRetry }: QuizResultProps) {
         )}
       </div>
     </Card>
+    </>
   )
 }

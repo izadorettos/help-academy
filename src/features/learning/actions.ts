@@ -7,10 +7,12 @@ import { z } from 'zod'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ActionResult = { ok: true } | { ok: false; error: string }
+export type ActionResult =
+  | { ok: true; xpEarned: number }
+  | { ok: false; error: string }
 
 export type QuizActionResult =
-  | { ok: true; score: number; passed: boolean; correctCount: number; totalQuestions: number; passingScore: number }
+  | { ok: true; score: number; passed: boolean; correctCount: number; totalQuestions: number; passingScore: number; xpEarned: number }
   | { ok: false; error: string }
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
@@ -48,7 +50,7 @@ export async function completeLesson(lessonId: string): Promise<ActionResult> {
 
     const supabase = await createServerClient()
 
-    const { error } = await supabase.rpc('complete_lesson', {
+    const { data: rpcData, error } = await supabase.rpc('complete_lesson', {
       p_lesson_id: lessonId,
     })
 
@@ -75,12 +77,16 @@ export async function completeLesson(lessonId: string): Promise<ActionResult> {
       return { ok: false, error: 'Não foi possível concluir a aula. Tente novamente.' }
     }
 
+    const resultData = rpcData as { xp_awarded?: number; already_completed?: boolean } | null
+    const xpEarned = resultData?.xp_awarded ?? 0
+
     // Revalidate pages that display lesson/path progress
     revalidatePath(`/aula/${lessonId}`)
     revalidatePath('/dashboard')
     revalidatePath('/trilhas')
+    revalidatePath('/perfil')
 
-    return { ok: true }
+    return { ok: true, xpEarned }
   } catch (err) {
     console.error('[completeLesson] unexpected error:', err)
     return { ok: false, error: 'Ocorreu um erro inesperado. Tente novamente.' }
@@ -139,12 +145,14 @@ export async function submitQuiz(
       correct_count: number
       total_questions: number
       passing_score: number
+      xp_awarded?: number
     }
 
     // Revalidate lesson page to reflect updated attempt state
     revalidatePath(`/aula/${quizId}`)
     revalidatePath('/dashboard')
     revalidatePath('/trilhas')
+    revalidatePath('/perfil')
 
     return {
       ok: true,
@@ -153,6 +161,7 @@ export async function submitQuiz(
       correctCount: result.correct_count,
       totalQuestions: result.total_questions,
       passingScore: result.passing_score,
+      xpEarned: result.xp_awarded ?? 0,
     }
   } catch (err) {
     console.error('[submitQuiz] unexpected error:', err)

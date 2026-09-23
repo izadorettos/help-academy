@@ -3,11 +3,13 @@ import Link from 'next/link'
 import { BookOpen, LayoutDashboard, Play } from 'lucide-react'
 import { requireUser } from '@/lib/auth/guards'
 import { getUserPaths, getOverallProgress, getLastStartedLesson } from '@/features/learning/queries'
+import { getProfile } from '@/features/profile/queries'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { ProgressRing } from '@/components/ui/progress-ring'
 import { EmptyState } from '@/components/ui/empty-state'
+import { LevelBadge } from '@/components/gamification/level-badge'
 import type { PathStatus, UserPath } from '@/features/learning/queries'
 
 export const metadata: Metadata = { title: 'Dashboard — Help Academy' }
@@ -76,21 +78,32 @@ function PathCard({ path }: { path: UserPath }) {
 export default async function DashboardPage() {
   const user = await requireUser()
 
-  const [paths, overall, lastLesson] = await Promise.all([
+  const [paths, overall, lastLesson, profile] = await Promise.all([
     getUserPaths(user.id),
     getOverallProgress(user.id),
     getLastStartedLesson(user.id),
+    getProfile(user.id),
   ])
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 space-y-8">
       {/* ── Greeting ── */}
       <section aria-label="Boas-vindas">
-        <h1 className="text-h1 font-bold">
-          Olá, {user.name.split(' ')[0]}!
-        </h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-h1 font-bold">
+            Olá, {user.name.split(' ')[0]}!
+          </h1>
+          {profile && (
+            <LevelBadge
+              level={profile.level.level}
+              levelName={profile.level.name}
+            />
+          )}
+        </div>
         <p className="text-text-muted text-sm mt-1">
-          Bem-vindo de volta à Help Academy.
+          {profile && profile.totalXp > 0
+            ? `${profile.totalXp} XP acumulados • Bem-vindo de volta à Help Academy.`
+            : 'Bem-vindo de volta à Help Academy.'}
         </p>
         {user.role === 'admin' && (
           <Link

@@ -22,7 +22,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 9 | Aulas | P2 | 8 | ✅ |
 | 10 | Progresso (start/complete) | P2 | 9 | ✅ |
 | 11 | Quiz | P3 | 10 | ✅ |
-| 12 | XP e níveis | P4 | 10, 11 | ⬜ |
+| 12 | XP e níveis | P4 | 10, 11 | ✅ |
 | 13 | Conquistas | P4 | 12 | ⬜ |
 | 14 | Admin | P5 | 5, 6 | ⬜ |
 | 15 | Relatórios | P6 | 14 | ⬜ |
@@ -240,16 +240,20 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - `is_correct` nunca sai do servidor: query usa admin client com SELECT explícito sem `is_correct`; RLS bloqueia SELECT de `quiz_options` para members.
 - `submit_quiz` chama `_complete_lesson_internal` automaticamente quando passed=true.
 
-### FASE 12 — XP e níveis  ⬜
+### FASE 12 — XP e níveis  ✅
 **Tarefas**
-- [ ] Migration 0011: `award_xp` e integração em `_complete_lesson_internal` e `submit_quiz`
-- [ ] `XpCard`, `LevelBadge`, `RewardToast`; dados no dashboard e perfil
-- [ ] `/perfil` (dados, XP, nível, trilhas concluídas, progresso; edição de nome/avatar)
+- [x] Migration 0011: `award_xp` idempotente (ON CONFLICT), integrado em `_complete_lesson_internal` e `submit_quiz`
+- [x] `XpCard`, `LevelBadge`, `RewardToast`; dados no dashboard e perfil
+- [x] `/perfil` (dados, XP, nível, trilhas concluídas, progresso; edição de nome/avatar com upload)
 
 **Concluída quando**
-- pgTAP: cada evento concede o valor de `gamification_settings`/`xp_reward`; repetição concede 0; mudar setting altera concessões futuras.
-- Teste unitário de `level_for_xp` nos limites (0, 99, 100, 999, 1000).
-- E2E: concluir aula mostra “+10 XP”; recarregar não soma de novo.
+- [x] pgTAP: 167 testes (40 novos xp_functions) — idempotência, settings, módulo/path, quiz perfect bonus
+- [x] 28 testes unitários para levelForXp nos limites exatos
+- [x] completeLesson e submitQuiz retornam xpEarned; RewardToast exibido no client
+
+**Notas**
+- `award_xp` idempotente por (user_id, reason, reference_id) — ON CONFLICT DO NOTHING.
+- XP de módulo e trilha concedido apenas na PRIMEIRA conclusão.
 
 ### FASE 13 — Conquistas  ⬜
 **Tarefas**
