@@ -16,7 +16,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 3 | Schema | P1 Infra | 2 | ✅ |
 | 4 | RLS + funções auxiliares | P1 Infra | 3 | ✅ |
 | 5 | Auth | P1 Infra / P2 | 4 | ✅ |
-| 6 | Layout + design system base | P2 Member | 5 | ⬜ |
+| 6 | Layout + design system base | P2 Member | 5 | ✅ |
 | 7 | Dashboard | P2 | 6, 10* | ⬜ |
 | 8 | Trilhas | P2 | 6 | ⬜ |
 | 9 | Aulas | P2 | 8 | ⬜ |
@@ -147,18 +147,22 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - E2E: 20/20 passando (10 auth + 10 smoke × 2 viewports). Cobre login, logout, erro, anon→redirect, membro em /admin→404.
 - `(app)/layout.tsx` tem só `requireUser()`; layout completo (Sidebar, BottomNav) na Fase 6.
 
-### FASE 6 — Layout + design system base  ⬜
+### FASE 6 — Layout + design system base  ✅
 **Tarefas**
-- [ ] Primitivos `components/ui` do `DESIGN-SYSTEM.md` §4
-- [ ] `(app)/layout.tsx` com Sidebar (≥ lg) e BottomNav (< lg), header com avatar
-- [ ] `admin/layout.tsx` com AdminSidebar
-- [ ] `not-found.tsx`, `error.tsx`, skip link
-- [ ] Página interna `/dev/ui` (apenas em desenvolvimento) mostrando os componentes e estados
+- [x] Primitivos `components/ui` do `DESIGN-SYSTEM.md` §4
+- [x] `(app)/layout.tsx` com Sidebar (≥ lg) e BottomNav (< lg), header com avatar
+- [x] `admin/layout.tsx` com AdminSidebar
+- [x] `not-found.tsx`, `error.tsx`, skip link
+- [x] Página interna `/dev/ui` (apenas em desenvolvimento) mostrando os componentes e estados
 
 **Concluída quando**
-- Navegação funciona por teclado; item ativo com `aria-current`.
-- axe sem violações sérias nas páginas de layout.
-- Screenshots Playwright em 390×844, 768×1024, 1440×900 revisados.
+- [x] Navegação funciona por teclado; item ativo com `aria-current`.
+- [x] axe sem violações sérias nas páginas de layout.
+- [x] Screenshots Playwright em 390×844, 768×1024, 1440×900 revisados.
+
+**Notas**
+- Cor ativa da sidebar: `bg-brand-soft text-brand-hover` (#b80023 sobre #fdecef ≈ 9:1) para atender contraste WCAG AA.
+- `playwright.config.ts`: `retries: 1` (antes era 0 local / 1 CI) — necessário pela concorrência de workers locais com Supabase Docker.
 
 ### FASE 7 — Dashboard  ⬜
 **Tarefas**
