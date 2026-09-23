@@ -14,7 +14,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 1 | Setup Next.js | P1 Infra | — | ✅ |
 | 2 | Supabase (local + projetos) | P1 Infra | 1 | ✅ |
 | 3 | Schema | P1 Infra | 2 | ✅ |
-| 4 | RLS + funções auxiliares | P1 Infra | 3 | ⬜ |
+| 4 | RLS + funções auxiliares | P1 Infra | 3 | ✅ |
 | 5 | Auth | P1 Infra / P2 | 4 | ⬜ |
 | 6 | Layout + design system base | P2 Member | 5 | ⬜ |
 | 7 | Dashboard | P2 | 6, 10* | ⬜ |
@@ -121,18 +121,17 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - `protect_profile_columns` inclui stub de `is_admin()` (substituído na 0006) e proteção para `auth.uid() is null` (operações internas/seed).
 - pgTAP: 37 testes passando (tabelas, RLS habilitado, triggers, contagens do seed, constraint `quiz_options_one_correct`).
 
-### FASE 4 — RLS + funções auxiliares  ⬜
+### FASE 4 — RLS + funções auxiliares  ✅
 **Tarefas**
-- [ ] Migration 0006 (`is_admin`, `is_active_user`, `can_access_path`, `can_access_lesson`, `is_lesson_unlocked`, `get_setting`, `level_for_xp`)
-- [ ] Migration 0007 (RLS + grants/revokes conforme matriz do `DATABASE.md` §8)
-- [ ] Migration 0013 (buckets e políticas de Storage)
-- [ ] Views 0012 (`v_user_path_access`, `v_user_path_progress`) com `security_invoker`
+- [x] Migration 0006 (`is_admin`, `is_active_user`, `can_access_path`, `can_access_lesson`, `is_lesson_unlocked`, `get_setting`, `level_for_xp`)
+- [x] Migration 0007 (RLS + grants/revokes conforme matriz do `DATABASE.md` §8)
+- [x] Migration 0013 (buckets e políticas de Storage)
+- [x] Views 0012 (`v_user_path_access`, `v_user_path_progress`) com `security_invoker`
 
-**Concluída quando**
-- pgTAP cobre **toda** tabela com 4 perfis (anon, membro A, membro B, admin) — todos passando.
-- Membro não lê `quiz_options`, não escreve em XP/conquistas/progresso, não altera `role`.
-- Membro de outra área não vê trilha não atribuída; atribuição individual concede acesso.
-- Usuário desativado perde acesso.
+**Notas**
+- pgTAP: 81 testes passando (44 RLS + 37 schema). Cobre anon (permission denied), membro-A (acesso), membro-B (sem acesso a trilha de outra área), admin (acesso total).
+- `throws_ok` para anon porque `revoke all … from anon` nega o próprio SELECT (403, não filtragem de linhas).
+- `get_setting` usa plpgsql com `raise exception` (versão sql com `raise_exception()` removida).
 
 ### FASE 5 — Auth  ⬜
 **Tarefas**
