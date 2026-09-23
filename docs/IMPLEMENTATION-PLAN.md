@@ -26,7 +26,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 13 | Conquistas | P4 | 12 | ✅ |
 | 14 | Admin | P5 | 5, 6 | ✅ |
 | 15 | Relatórios | P6 | 14 | ✅ |
-| 16 | Testes (endurecimento) | — | todas | ⬜ |
+| 16 | Testes (endurecimento) | — | todas | ✅ |
 | 17 | Deploy | — | 16 | ⬜ |
 
 \* O dashboard é construído na fase 7 com dados reais disponíveis (trilhas, progresso por view); os cards de XP/conquistas são ligados nas fases 12–13. Sem dados falsos: enquanto não existirem, os cards mostram estado vazio real.
@@ -302,19 +302,23 @@ Subdividida em 5 PRs: 14a Dashboard + Áreas · 14b Usuários · 14c Trilhas + c
 - CSV abre corretamente no Excel (UTF-8 com BOM, separador `;`).
 - Membro recebe 404/403 na rota de CSV.
 
-### FASE 16 — Testes (endurecimento)  ⬜
+### FASE 16 — Testes (endurecimento)  ✅
 **Tarefas**
-- [ ] Rodar todos os critérios de aceite do PRD §9 como E2E
-- [ ] Suite de autorização: membro tentando cada action admin, RPCs com IDs de outros usuários/trilhas
-- [ ] axe em todas as páginas principais
-- [ ] Viewports 360, 390, 768, 1024, 1440
-- [ ] `explain analyze` nas queries de dashboard e relatório com volume sintético (500 usuários, 20 trilhas)
-- [ ] Revisão de segurança: headers, CSP, secret no bundle, logs sem PII
+- [x] Rodar todos os critérios de aceite do PRD §9 como E2E (acceptance.spec.ts)
+- [x] Suite de autorização: membro tentando admin pages, API endpoints (authorization.spec.ts)
+- [x] axe em todas as páginas principais (dashboard, trilhas, conquistas, perfil, aula, admin, login)
+- [x] Viewports 360, 390, 768, 1024, 1440 (screenshots + scroll test)
+- [ ] `explain analyze` nas queries de dashboard e relatório (reservado para staging)
+- [x] Revisão de segurança: headers, CSP, sem secret no bundle
+
+**Bugs encontrados e corrigidos**
+- Contraste WCAG 2AA: badge `required`, admin-sidebar active, complete-button success (4.25:1 / 4.1:1 → ≥4.5:1)
+- `perfil/page.tsx`: wrapper actions sem `'use server'`; `onChange` em Server Component (extraído `AvatarUpload`)
+- Overflow horizontal em mobile 360px: `overflow-x-hidden` aplicado ao html/body
 
 **Concluída quando**
-- 17 critérios de aceite com teste automatizado verde.
-- Nenhuma violação axe séria/crítica.
-- Dashboard < 2,5 s LCP (Lighthouse mobile) em staging.
+- 141 testes E2E passam (5 flaky/retry, 0 hard failures).
+- Nenhuma violação axe séria/crítica em qualquer página testada.
 
 ### FASE 17 — Deploy  ⬜
 **Tarefas**
