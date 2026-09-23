@@ -1,3 +1,55 @@
 import 'server-only'
-// Implementado na Fase 5 (Auth).
-// requireUser e requireAdmin lançam redirect/notFound quando a checagem falha.
+import { cache } from 'react'
+import { redirect, notFound } from 'next/navigation'
+import { createServerClient } from '@/lib/supabase/server'
+import type { Database } from '@/types/database.types'
+
+type UserRole = Database['public']['Enums']['user_role']
+
+export type SessionUser = {
+  id: string
+  email: string
+  name: string
+  role: UserRole
+  departmentId: string | null
+  avatarUrl: string | null
+}
+
+const getSessionUser = cache(async (): Promise<SessionUser | null> => {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+  if (error || !user) return null
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, email, name, role, active, department_id, avatar_url')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.active) return null
+
+  return {
+    id: profile.id,
+    email: profile.email,
+    name: profile.name,
+    role: profile.role,
+    departmentId: profile.department_id,
+    avatarUrl: profile.avatar_url,
+  }
+})
+
+export async function requireUser(): Promise<SessionUser> {
+  const user = await getSessionUser()
+  if (!user) redirect('/login')
+  return user
+}
+
+export async function requireAdmin(): Promise<SessionUser> {
+  const user = await getSessionUser()
+  if (!user) redirect('/login')
+  if (user.role !== 'admin') notFound()
+  return user
+}

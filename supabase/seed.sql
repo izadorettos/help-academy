@@ -87,7 +87,11 @@ insert into auth.users (
   id, instance_id, aud, role,
   email, encrypted_password,
   email_confirmed_at, created_at, updated_at,
-  raw_user_meta_data
+  raw_user_meta_data,
+  -- GoTrue escaneia estes campos como string (não nullable); precisam ser '' e não NULL.
+  -- phone tem unique constraint e default NULL — não incluir aqui.
+  confirmation_token, recovery_token,
+  email_change_token_new, email_change
 ) values
   (
     '00000000-0000-0000-0000-000000000001',
@@ -96,7 +100,8 @@ insert into auth.users (
     'admin@help.local',
     crypt('Admin@123', gen_salt('bf')),
     now(), now(), now(),
-    '{"name": "Admin Help"}'::jsonb
+    '{"name": "Admin Help"}'::jsonb,
+    '', '', '', ''
   ),
   (
     '00000000-0000-0000-0000-000000000002',
@@ -105,7 +110,8 @@ insert into auth.users (
     'membro@help.local',
     crypt('Membro@123', gen_salt('bf')),
     now(), now(), now(),
-    '{"name": "João Membro"}'::jsonb
+    '{"name": "João Membro"}'::jsonb,
+    '', '', '', ''
   )
 on conflict (id) do nothing;
 

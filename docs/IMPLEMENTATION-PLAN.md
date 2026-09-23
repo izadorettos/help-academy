@@ -15,7 +15,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 2 | Supabase (local + projetos) | P1 Infra | 1 | ✅ |
 | 3 | Schema | P1 Infra | 2 | ✅ |
 | 4 | RLS + funções auxiliares | P1 Infra | 3 | ✅ |
-| 5 | Auth | P1 Infra / P2 | 4 | ⬜ |
+| 5 | Auth | P1 Infra / P2 | 4 | ✅ |
 | 6 | Layout + design system base | P2 Member | 5 | ⬜ |
 | 7 | Dashboard | P2 | 6, 10* | ⬜ |
 | 8 | Trilhas | P2 | 6 | ⬜ |
@@ -133,18 +133,19 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - `throws_ok` para anon porque `revoke all … from anon` nega o próprio SELECT (403, não filtragem de linhas).
 - `get_setting` usa plpgsql com `raise exception` (versão sql com `raise_exception()` removida).
 
-### FASE 5 — Auth  ⬜
+### FASE 5 — Auth  ✅
 **Tarefas**
-- [ ] `/login`, `/recuperar-senha`, `/redefinir-senha`, `/auth/confirm`
-- [ ] Actions `signIn`, `signOut`, `requestPasswordReset`, `updatePassword` com Zod
-- [ ] `requireUser`, `requireAdmin` (com `React.cache`)
-- [ ] `/` redireciona para `/dashboard` ou `/login`
-- [ ] Mensagens de erro genéricas (“Email ou senha inválidos.”)
+- [x] `/login`, `/recuperar-senha`, `/redefinir-senha`, `/auth/confirm`
+- [x] Actions `signIn`, `signOut`, `requestPasswordReset`, `updatePassword` com Zod
+- [x] `requireUser`, `requireAdmin` (com `React.cache`)
+- [x] `/` redireciona para `/dashboard` ou `/login`
+- [x] Mensagens de erro genéricas (“E-mail ou senha inválidos.”)
 
-**Concluída quando**
-- E2E: login válido → `/dashboard`; inválido → mensagem; logout; anônimo em `/dashboard` e `/admin` → `/login`; membro em `/admin` → 404.
-- Recuperação de senha funciona localmente (Inbucket/Mailpit do Supabase).
-- Usuário desativado não entra.
+**Notas**
+- Seed corrigido: `confirmation_token`, `recovery_token`, `email_change_token_new`, `email_change` precisam ser `''` (GoTrue escaneia como `string`, não `NullString`). `phone` omitido (unique + default NULL).
+- Proxy redireciona anon → `/login` para rotas protegidas e usuário autenticado → `/dashboard` em páginas de auth.
+- E2E: 20/20 passando (10 auth + 10 smoke × 2 viewports). Cobre login, logout, erro, anon→redirect, membro em /admin→404.
+- `(app)/layout.tsx` tem só `requireUser()`; layout completo (Sidebar, BottomNav) na Fase 6.
 
 ### FASE 6 — Layout + design system base  ⬜
 **Tarefas**
