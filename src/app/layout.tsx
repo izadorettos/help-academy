@@ -19,8 +19,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR">
-      <body className="min-h-dvh">
+    <html lang="pt-BR" className="overflow-x-hidden">
+      <body className="min-h-dvh overflow-x-hidden">
           <SkipLink />
           {children}
         </body>

@@ -4,17 +4,18 @@ import { getProfile } from '@/features/profile/queries'
 import { updateProfile, uploadAvatar } from '@/features/profile/actions'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Avatar } from '@/components/ui/avatar'
+import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { XpCard } from '@/components/gamification/xp-card'
 
-// Wrapper actions that satisfy the (formData: FormData) => void | Promise<void> constraint
-async function handleUploadAvatar(formData: FormData): Promise<void> {
-  await uploadAvatar(formData)
+async function handleUpdateProfile(formData: FormData): Promise<void> {
+  'use server'
+  await updateProfile(formData)
 }
 
-async function handleUpdateProfile(formData: FormData): Promise<void> {
-  await updateProfile(formData)
+async function handleUploadAvatar(formData: FormData): Promise<void> {
+  'use server'
+  await uploadAvatar(formData)
 }
 
 export const metadata: Metadata = { title: 'Perfil — Help Academy' }
@@ -40,32 +41,7 @@ export default async function PerfilPage() {
       {/* ── Identity card ── */}
       <Card className="p-6">
         <div className="flex items-center gap-5">
-          {/* Avatar — wrapped in a form for upload */}
-          <form action={handleUploadAvatar} className="shrink-0">
-            <label
-              htmlFor="avatar-upload"
-              className="relative cursor-pointer group focus-within:outline-none"
-              title="Alterar foto"
-            >
-              <Avatar src={profile.avatarUrl} name={profile.name} size={64} />
-              <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-semibold">
-                Alterar
-              </span>
-              <input
-                id="avatar-upload"
-                type="file"
-                name="avatar"
-                accept="image/*"
-                className="sr-only"
-                onChange={(e) => {
-                  // submit form automatically on file select
-                  const form = e.currentTarget.closest('form')
-                  form?.requestSubmit()
-                }}
-                aria-label="Alterar foto de perfil"
-              />
-            </label>
-          </form>
+          <AvatarUpload src={profile.avatarUrl} name={profile.name} action={handleUploadAvatar} />
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">

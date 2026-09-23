@@ -43,7 +43,7 @@ export function CompleteButton({ lessonId, isCompleted }: CompleteButtonProps) {
         <div
           role="status"
           aria-live="polite"
-          className="inline-flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-5 py-2.5 text-sm font-semibold text-success"
+          className="inline-flex items-center gap-2 rounded-lg border border-success/30 bg-success-soft px-5 py-2.5 text-sm font-semibold text-success"
         >
           <CheckCircle2 className="size-4 shrink-0" aria-hidden />
           Aula concluída

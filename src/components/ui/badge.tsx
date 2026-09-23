@@ -8,7 +8,7 @@ const BADGE_CLASSES: Record<BadgeVariant, string> = {
   warning: 'bg-warning-soft text-warning',
   muted: 'bg-surface-muted text-text-subtle',
   xp: 'bg-xp-soft text-xp',
-  required: 'bg-brand-soft text-brand',
+  required: 'bg-brand-soft text-brand-hover',
   brand: 'bg-brand text-on-brand',
 }
 

@@ -53,7 +53,7 @@ export function DepartmentAssignment({ pathId, departments, assignedIds }: Props
               key={dept.id}
               className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
                 selected.has(dept.id)
-                  ? 'border-brand bg-brand-soft text-brand'
+                  ? 'border-brand bg-brand-soft text-brand-hover'
                   : 'border-border bg-surface text-text hover:bg-surface-muted'
               }`}
             >

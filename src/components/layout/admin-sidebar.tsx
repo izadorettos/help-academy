@@ -43,7 +43,7 @@ export function AdminSidebar() {
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${active ? 'bg-brand-soft text-brand' : 'text-text-muted hover:bg-surface-muted hover:text-text'}`}
+              className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${active ? 'bg-brand-soft text-brand-hover' : 'text-text-muted hover:bg-surface-muted hover:text-text'}`}
             >
               <Icon className="size-5 shrink-0" aria-hidden />
               {label}
