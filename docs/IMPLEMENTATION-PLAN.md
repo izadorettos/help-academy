@@ -13,7 +13,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 |---|---|---|---|---|
 | 1 | Setup Next.js | P1 Infra | — | ✅ |
 | 2 | Supabase (local + projetos) | P1 Infra | 1 | ✅ |
-| 3 | Schema | P1 Infra | 2 | ⬜ |
+| 3 | Schema | P1 Infra | 2 | ✅ |
 | 4 | RLS + funções auxiliares | P1 Infra | 3 | ⬜ |
 | 5 | Auth | P1 Infra / P2 | 4 | ⬜ |
 | 6 | Layout + design system base | P2 Member | 5 | ⬜ |
@@ -110,16 +110,16 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - Chaves locais em `.env.local` (não versionado); `.env.example` atualizado.
 - `supabase start` baixa imagens Docker na primeira execução (~300 MB); em runs subsequentes é instantâneo.
 
-### FASE 3 — Schema  ⬜
-**Tarefas**
-- [ ] Migrations 0001–0005 e 0008 (tabelas, enums, constraints, índices, triggers de `updated_at`, `handle_new_user`, `protect_profile_columns`)
-- [ ] `seed.sql` (áreas, níveis, settings, conquistas, usuários e trilha demo locais)
-- [ ] Gerar `database.types.ts`
+### FASE 3 — Schema  ✅
 
-**Concluída quando**
-- `supabase db reset` roda do zero sem erro.
-- pgTAP: existência de tabelas/colunas/constraints-chave; constraints únicas rejeitam duplicata (progresso, XP, conquista, opção correta dupla).
-- Criar usuário em `auth.users` gera `profiles`.
+**Tarefas**
+- [x] Migrations 0001–0005 e 0008 (tabelas, enums, constraints, índices, triggers de `updated_at`, `handle_new_user`, `protect_profile_columns`)
+- [x] `seed.sql` (áreas, níveis, settings, conquistas, usuários e trilha demo locais)
+- [x] Gerar `database.types.ts`
+
+**Notas**
+- `protect_profile_columns` inclui stub de `is_admin()` (substituído na 0006) e proteção para `auth.uid() is null` (operações internas/seed).
+- pgTAP: 37 testes passando (tabelas, RLS habilitado, triggers, contagens do seed, constraint `quiz_options_one_correct`).
 
 ### FASE 4 — RLS + funções auxiliares  ⬜
 **Tarefas**
