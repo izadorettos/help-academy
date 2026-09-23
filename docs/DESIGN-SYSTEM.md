@@ -50,7 +50,7 @@ Regras:
 
 ### 2.2 Tipografia
 
-- Fonte: **Inter** via `next/font` (provisória, até definir a fonte da marca), fallback `system-ui`.
+- Fonte: **pilha do sistema** (`system-ui`, `-apple-system`, `Segoe UI`, `Roboto`) até a decisão D-01; a fonte da marca entrará via `next/font/local` (arquivos no repositório, sem depender do Google Fonts no build).
 - Base 16 px (nunca menor que 14 px para texto corrido; inputs ≥ 16 px para evitar zoom no iOS).
 
 | Token | Tamanho / altura | Peso | Uso |

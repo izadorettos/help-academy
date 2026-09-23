@@ -11,7 +11,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 
 | # | Fase | Prioridade da spec | Depende de | Status |
 |---|---|---|---|---|
-| 1 | Setup Next.js | P1 Infra | — | ⬜ |
+| 1 | Setup Next.js | P1 Infra | — | 🟨 bloqueada |
 | 2 | Supabase (local + projetos) | P1 Infra | 1 | ⬜ |
 | 3 | Schema | P1 Infra | 2 | ⬜ |
 | 4 | RLS + funções auxiliares | P1 Infra | 3 | ⬜ |
@@ -74,7 +74,9 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 
 ## 4. Fases
 
-### FASE 1 — Setup Next.js  ⬜  *(escopo detalhado em §5)*
+### FASE 1 — Setup Next.js  🟨  *(escopo detalhado em §5)*
+> **Bloqueio (23/09/2026):** o ambiente de execução do agente não acessa `registry.npmjs.org` (host fora da allowlist de rede da conta). Todos os arquivos da fase foram escritos, mas `npm install` e, portanto, lint/typecheck/test/build ainda **não foram executados**. A fase só será marcada ✅ após a validação.
+
 **Tarefas**
 - [ ] Criar app Next.js (App Router, TS, Tailwind, ESLint, `src/`, alias `@/*`)
 - [ ] `tsconfig` strict + `noUncheckedIndexedAccess`

@@ -1,0 +1,29 @@
+# dependências
+node_modules/
+
+# Next.js
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+
+# testes
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# ambiente — nunca commitar segredos
+.env
+.env*.local
+!.env.example
+
+# Supabase local
+supabase/.branches
+supabase/.temp
+
+# sistema
+.DS_Store
+*.log
+.vercel
