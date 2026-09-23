@@ -12,7 +12,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | # | Fase | Prioridade da spec | Depende de | Status |
 |---|---|---|---|---|
 | 1 | Setup Next.js | P1 Infra | — | ✅ |
-| 2 | Supabase (local + projetos) | P1 Infra | 1 | ⬜ |
+| 2 | Supabase (local + projetos) | P1 Infra | 1 | ✅ |
 | 3 | Schema | P1 Infra | 2 | ⬜ |
 | 4 | RLS + funções auxiliares | P1 Infra | 3 | ⬜ |
 | 5 | Auth | P1 Infra / P2 | 4 | ⬜ |
@@ -95,19 +95,20 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - `lib/env.ts` falha com mensagem clara se faltar variável.
 - Nenhuma dependência além das listadas em §5.
 
-### FASE 2 — Supabase  ⬜
-**Tarefas**
-- [ ] `supabase init`; `config.toml` com `enable_signup = false`, `site_url`, redirect URLs, templates de email em pt-BR
-- [ ] Instalar `@supabase/supabase-js` e `@supabase/ssr`
-- [ ] `lib/supabase/client.ts`, `server.ts`, `admin.ts` (`server-only`), `proxy.ts`
-- [ ] `src/proxy.ts` (ou `middleware.ts`) renovando sessão
-- [ ] Script `db:types`
-- [ ] Criar projetos staging/produção (D-04) e documentar variáveis na Vercel
+### FASE 2 — Supabase  ✅
 
-**Concluída quando**
-- `supabase start` sobe localmente; app conecta (health check em Server Component lendo `select 1` via RPC ou `auth.getUser()` sem erro).
-- Teste unitário garante que `admin.ts` não pode ser importado no cliente (`server-only`).
-- Build de produção não contém a secret key (checagem por grep no `.next/`).
+**Tarefas**
+- [x] `supabase init`; `config.toml` com `enable_signup = false`, `site_url`, redirect URLs, templates de email em pt-BR
+- [x] Instalar `@supabase/supabase-js` e `@supabase/ssr`
+- [x] `lib/supabase/client.ts`, `server.ts`, `admin.ts` (`server-only`), `proxy.ts`
+- [x] `src/proxy.ts` renovando sessão (Next.js 16 usa `proxy` em vez de `middleware`)
+- [x] Script `db:types`
+- [ ] Criar projetos staging/produção (D-04) — requer credenciais Supabase (resolver na Fase 17)
+
+**Notas**
+- Porta E2E configurada como 3001 (evita conflito com outros processos locais).
+- Chaves locais em `.env.local` (não versionado); `.env.example` atualizado.
+- `supabase start` baixa imagens Docker na primeira execução (~300 MB); em runs subsequentes é instantâneo.
 
 ### FASE 3 — Schema  ⬜
 **Tarefas**

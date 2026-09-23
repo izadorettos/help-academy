@@ -1,0 +1,1 @@
+-- Seed local: preenchido na Fase 3 com áreas, níveis, configurações, conquistas e trilha demo.
