@@ -17,7 +17,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 4 | RLS + funções auxiliares | P1 Infra | 3 | ✅ |
 | 5 | Auth | P1 Infra / P2 | 4 | ✅ |
 | 6 | Layout + design system base | P2 Member | 5 | ✅ |
-| 7 | Dashboard | P2 | 6, 10* | ⬜ |
+| 7 | Dashboard | P2 | 6, 10* | ✅ |
 | 8 | Trilhas | P2 | 6 | ⬜ |
 | 9 | Aulas | P2 | 8 | ⬜ |
 | 10 | Progresso (start/complete) | P2 | 9 | ⬜ |
@@ -164,16 +164,21 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - Cor ativa da sidebar: `bg-brand-soft text-brand-hover` (#b80023 sobre #fdecef ≈ 9:1) para atender contraste WCAG AA.
 - `playwright.config.ts`: `retries: 1` (antes era 0 local / 1 CI) — necessário pela concorrência de workers locais com Supabase Docker.
 
-### FASE 7 — Dashboard  ⬜
+### FASE 7 — Dashboard  ✅
 **Tarefas**
-- [ ] `features/learning/queries.ts`: trilhas do usuário com progresso, progresso geral (RN-05), última aula iniciada
-- [ ] Cabeçalho, card de progresso geral, ContinueCard, grid “Minhas trilhas”, atalho admin
-- [ ] `loading.tsx` e estados vazios
+- [x] `features/learning/queries.ts`: trilhas do usuário com progresso, progresso geral (RN-05), última aula iniciada
+- [x] Cabeçalho, card de progresso geral, ContinueCard, grid “Minhas trilhas”, atalho admin
+- [x] `loading.tsx` e estados vazios
 
 **Concluída quando**
-- Membro do seed vê somente as trilhas da sua área/individuais; % bate com cálculo manual.
-- Usuário sem trilhas vê o estado vazio correto.
-- Teste unitário do cálculo de progresso geral.
+- [x] Membro do seed vê somente as trilhas da sua área/individuais; % bate com cálculo manual.
+- [x] Usuário sem trilhas vê o estado vazio correto.
+- [x] Teste unitário do cálculo de progresso geral.
+
+**Notas**
+- Botão “Sair” adicionado ao Sidebar (desktop) e AppHeader (mobile).
+- `features/learning/progress.ts` contém lógica pura de cálculo de progresso geral (RN-05).
+- 8 testes unitários em `tests/unit/overall-progress.test.ts`.
 
 ### FASE 8 — Trilhas  ⬜
 **Tarefas**

@@ -1,5 +1,8 @@
+'use client'
 import Link from 'next/link'
+import { LogOut } from 'lucide-react'
 import { Avatar } from '@/components/ui/avatar'
+import { signOut } from '@/features/auth/actions'
 import type { SessionUser } from '@/lib/auth/guards'
 
 interface AppHeaderProps {
@@ -12,9 +15,21 @@ export function AppHeader({ user }: AppHeaderProps) {
       <Link href="/dashboard" className="text-brand font-bold">
         Help Academy
       </Link>
-      <Link href="/perfil" aria-label="Meu perfil">
-        <Avatar src={user.avatarUrl} name={user.name} size={32} />
-      </Link>
+      <div className="flex items-center gap-2">
+        <form action={signOut}>
+          <button
+            type="submit"
+            aria-label="Sair"
+            className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-text-muted hover:bg-surface-muted hover:text-text transition-colors"
+          >
+            <LogOut className="size-4 shrink-0" aria-hidden />
+            <span>Sair</span>
+          </button>
+        </form>
+        <Link href="/perfil" aria-label="Meu perfil">
+          <Avatar src={user.avatarUrl} name={user.name} size={32} />
+        </Link>
+      </div>
     </header>
   )
 }

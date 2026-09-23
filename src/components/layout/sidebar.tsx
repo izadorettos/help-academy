@@ -1,8 +1,9 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BookOpen, Award, User, Settings } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Award, User, Settings, LogOut } from 'lucide-react'
 import { Avatar } from '@/components/ui/avatar'
+import { signOut } from '@/features/auth/actions'
 import type { SessionUser } from '@/lib/auth/guards'
 
 interface SidebarProps {
@@ -62,13 +63,22 @@ export function Sidebar({ user }: SidebarProps) {
         )}
       </nav>
 
-      <div className="border-border border-t p-4">
+      <div className="border-border border-t p-4 space-y-2">
         <Link href="/perfil" className="flex items-center gap-3">
           <Avatar src={user.avatarUrl} name={user.name} size={32} />
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{user.name}</p>
           </div>
         </Link>
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text-muted hover:bg-surface-muted hover:text-text transition-colors"
+          >
+            <LogOut className="size-4 shrink-0" aria-hidden />
+            Sair
+          </button>
+        </form>
       </div>
     </aside>
   )
