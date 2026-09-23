@@ -6,6 +6,7 @@ import {
   Users,
   Building2,
   BookOpen,
+  FileText,
   BarChart3,
   Settings,
   ArrowLeft,
@@ -16,6 +17,7 @@ const ADMIN_NAV = [
   { href: '/admin/usuarios', label: 'Usuários', icon: Users, exact: false },
   { href: '/admin/areas', label: 'Áreas', icon: Building2, exact: false },
   { href: '/admin/trilhas', label: 'Trilhas', icon: BookOpen, exact: false },
+  { href: '/admin/conteudos', label: 'Conteúdos', icon: FileText, exact: false },
   { href: '/admin/relatorios', label: 'Relatórios', icon: BarChart3, exact: false },
   { href: '/admin/configuracoes', label: 'Configurações', icon: Settings, exact: false },
 ]

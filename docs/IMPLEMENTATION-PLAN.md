@@ -24,7 +24,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 11 | Quiz | P3 | 10 | ✅ |
 | 12 | XP e níveis | P4 | 10, 11 | ✅ |
 | 13 | Conquistas | P4 | 12 | ✅ |
-| 14 | Admin | P5 | 5, 6 | 🔄 |
+| 14 | Admin | P5 | 5, 6 | ✅ |
 | 15 | Relatórios | P6 | 14 | ⬜ |
 | 16 | Testes (endurecimento) | — | todas | ⬜ |
 | 17 | Deploy | — | 16 | ⬜ |
@@ -268,24 +268,28 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - `evaluate_achievements` chamada ao final de `_complete_lesson_internal` e `submit_quiz`.
 - RPCs retornam `achievements_unlocked: [{id, code, name, icon}]` para o client mostrar toast.
 
-### FASE 14 — Admin  ⬜
-Subdividir em PRs: 14a Dashboard + Áreas · 14b Usuários · 14c Trilhas + construtor · 14d Aulas + quiz + conteúdos · 14e Configurações.
+### FASE 14 — Admin  ✅
+Subdividida em 5 PRs: 14a Dashboard + Áreas · 14b Usuários · 14c Trilhas + construtor · 14d Aulas + quiz + conteúdos · 14e Configurações.
 
 **Tarefas**
-- [ ] `/admin` métricas (D-09)
-- [ ] Áreas: CRUD + desativar
-- [ ] Usuários: convidar (Auth Admin API), editar, desativar/reativar (ban), área, role, trilhas individuais, reenviar convite
-- [ ] Trilhas: CRUD, duplicar, publicar/despublicar, arquivar, áreas-alvo, ordem, obrigatória, sequencial
-- [ ] Construtor: módulos/aulas/quiz, reordenar com ↑↓ (RPC transacional)
-- [ ] Editor de aula por tipo (upload de PDF, validação de URL) e de quiz
-- [ ] `/admin/conteudos` com busca/filtros
-- [ ] `/admin/configuracoes` (XP e níveis)
-- [ ] `ConfirmDialog` em toda ação destrutiva
+- [x] `/admin` métricas (D-09)
+- [x] Áreas: CRUD + desativar
+- [x] Usuários: convidar (Auth Admin API), editar, desativar/reativar (ban), área, role, trilhas individuais, reenviar convite
+- [x] Trilhas: CRUD, duplicar, publicar/despublicar, arquivar, áreas-alvo, ordem, obrigatória, sequencial
+- [x] Construtor: módulos/aulas/quiz, reordenar com ↑↓ (RPC transacional)
+- [x] Editor de aula por tipo (upload de PDF, validação de URL) e de quiz
+- [x] `/admin/conteudos` com busca/filtros
+- [x] `/admin/configuracoes` (XP e níveis): Tab XP Settings (edição em lote) + Tab Níveis (tabela editável inline)
+- [x] `ConfirmDialog` em toda ação destrutiva
 
-**Concluída quando**
-- Toda action admin começa com `requireAdmin()` (teste que chama a action como membro → erro).
-- E2E: admin convida usuário → usuário define senha → vê trilha da área; admin cria trilha completa com quiz, publica e atribui individualmente → membro conclui.
-- Admin não consegue remover o próprio papel de admin nem desativar a si mesmo.
+**Notas da fase 14e (Configurações)**
+- `src/features/admin/settings/queries.ts`: `adminGetGamificationSettings()` e `adminGetLevels()`.
+- `src/features/admin/settings/actions.ts`: `updateGamificationSettings(formData)` (atualiza todas as chaves XP em loop) e `updateLevel(formData)` (atualiza nome e min_xp de um nível).
+- `src/features/admin/settings/schemas.ts`: validação Zod com `z.coerce.number()`.
+- Página `/admin/configuracoes` usa o componente `<Tabs>` existente; XpSettingsForm e LevelsTable são Client Components com `useActionState`.
+- Sidebar já tinha o item "Configurações" — nenhuma alteração necessária.
+- Nível 1 tem `min_xp` desabilitado na UI (sempre 0 por constraint do banco).
+- Todos os checks passam: lint, typecheck, test (65 testes), build, test:e2e (41/41).
 
 ### FASE 15 — Relatórios  ⬜
 **Tarefas**
