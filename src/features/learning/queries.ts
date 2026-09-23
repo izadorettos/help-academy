@@ -495,6 +495,36 @@ export async function getPathBySlug(
 
 // ─── Lesson viewer ────────────────────────────────────────────────────────────
 
+// ─── Quiz types (safe — no is_correct) ───────────────────────────────────────
+
+export interface QuizOptionSafe {
+  id: string
+  text: string
+}
+
+export interface QuizQuestionSafe {
+  id: string
+  question: string
+  type: 'multiple_choice' | 'true_false'
+  options: QuizOptionSafe[]
+}
+
+export interface QuizForLesson {
+  id: string
+  title: string
+  passingScore: number
+  questions: QuizQuestionSafe[]
+}
+
+export interface LastQuizAttempt {
+  score: number
+  passed: boolean
+  correctCount: number
+  totalQuestions: number
+  passingScore: number
+  completedAt: string
+}
+
 export interface LessonForMember {
   id: string
   title: string
@@ -527,6 +557,10 @@ export interface LessonForMember {
   }
   prevLessonId: string | null
   nextLessonId: string | null
+  /** Quiz data — null when lesson has no quiz. NEVER includes is_correct. */
+  quiz: QuizForLesson | null
+  /** Most recent quiz attempt by this user — null if never attempted */
+  lastAttempt: LastQuizAttempt | null
 }
 
 /**
@@ -677,7 +711,82 @@ export async function getLessonForMember(
     signedPdfUrl = signedData?.signedUrl ?? null
   }
 
-  // 6. Fire-and-forget: call start_lesson to track last_accessed_at.
+  // 6. Fetch quiz for this lesson (WITHOUT is_correct — members never get the answer key)
+  // RLS on quiz_options blocks SELECT for members entirely; we only select from
+  // quizzes and quiz_questions here. Options are fetched via admin client to bypass RLS,
+  // but only id and text are returned (is_correct is never selected).
+  let quizData: QuizForLesson | null = null
+  let lastAttempt: LastQuizAttempt | null = null
+
+  const { data: quizRow } = await supabase
+    .from('quizzes')
+    .select('id, title, passing_score')
+    .eq('lesson_id', lessonId)
+    .maybeSingle()
+
+  if (quizRow) {
+    // Fetch questions via admin client (quiz_options RLS blocks member SELECT)
+    // We explicitly exclude is_correct from the select projection
+    const adminClient = createAdminClient()
+    const { data: questionsData } = await adminClient
+      .from('quiz_questions')
+      .select(
+        `id, question, type, position,
+         quiz_options(id, text, position)`,
+      )
+      .eq('quiz_id', quizRow.id)
+      .order('position', { ascending: true })
+
+    if (questionsData) {
+      const questions: QuizQuestionSafe[] = (
+        questionsData as Array<{
+          id: string
+          question: string
+          type: string
+          position: number
+          quiz_options: Array<{ id: string; text: string; position: number }>
+        }>
+      ).map((q) => ({
+        id: q.id,
+        question: q.question,
+        type: q.type as 'multiple_choice' | 'true_false',
+        options: (q.quiz_options ?? [])
+          .slice()
+          .sort((a, b) => a.position - b.position)
+          .map((o) => ({ id: o.id, text: o.text })),
+      }))
+
+      quizData = {
+        id: String(quizRow.id),
+        title: String(quizRow.title),
+        passingScore: Number(quizRow.passing_score),
+        questions,
+      }
+    }
+
+    // Fetch most recent attempt for this user + quiz
+    const { data: attemptRow } = await supabase
+      .from('quiz_attempts')
+      .select('score, passed, correct_count, total_questions, completed_at')
+      .eq('quiz_id', quizRow.id)
+      .eq('user_id', userId)
+      .order('completed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (attemptRow) {
+      lastAttempt = {
+        score: Number(attemptRow.score),
+        passed: Boolean(attemptRow.passed),
+        correctCount: Number(attemptRow.correct_count),
+        totalQuestions: Number(attemptRow.total_questions),
+        passingScore: Number(quizRow.passing_score),
+        completedAt: String(attemptRow.completed_at),
+      }
+    }
+  }
+
+  // 7. Fire-and-forget: call start_lesson to track last_accessed_at.
   // Only call when the lesson is not locked (RPC would throw LESSON_LOCKED otherwise).
   // Errors are intentionally swallowed — this must not fail the page load.
   if (!locked) {
@@ -721,5 +830,61 @@ export async function getLessonForMember(
     },
     prevLessonId,
     nextLessonId,
+    quiz: quizData,
+    lastAttempt,
+  }
+}
+
+/**
+ * Returns quiz data for a lesson, safe to send to client (no is_correct).
+ * Uses admin client to read quiz_options (RLS blocks members from reading quiz_options).
+ * Returns null if no quiz exists for this lesson.
+ */
+export async function getQuizForLesson(lessonId: string): Promise<QuizForLesson | null> {
+  const supabase = await createServerClient()
+
+  const { data: quizRow } = await supabase
+    .from('quizzes')
+    .select('id, title, passing_score')
+    .eq('lesson_id', lessonId)
+    .maybeSingle()
+
+  if (!quizRow) return null
+
+  const adminClient = createAdminClient()
+  const { data: questionsData } = await adminClient
+    .from('quiz_questions')
+    .select(
+      `id, question, type, position,
+       quiz_options(id, text, position)`,
+    )
+    .eq('quiz_id', quizRow.id)
+    .order('position', { ascending: true })
+
+  if (!questionsData) return null
+
+  const questions: QuizQuestionSafe[] = (
+    questionsData as Array<{
+      id: string
+      question: string
+      type: string
+      position: number
+      quiz_options: Array<{ id: string; text: string; position: number }>
+    }>
+  ).map((q) => ({
+    id: q.id,
+    question: q.question,
+    type: q.type as 'multiple_choice' | 'true_false',
+    options: (q.quiz_options ?? [])
+      .slice()
+      .sort((a, b) => a.position - b.position)
+      .map((o) => ({ id: o.id, text: o.text })),
+  }))
+
+  return {
+    id: String(quizRow.id),
+    title: String(quizRow.title),
+    passingScore: Number(quizRow.passing_score),
+    questions,
   }
 }

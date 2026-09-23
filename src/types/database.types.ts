@@ -843,6 +843,10 @@ export type Database = {
         }[]
       }
       start_lesson: { Args: { p_lesson_id: string }; Returns: undefined }
+      submit_quiz: {
+        Args: { p_answers: Json; p_quiz_id: string }
+        Returns: Json
+      }
       user_total_xp: { Args: { p_user: string }; Returns: number }
     }
     Enums: {

@@ -17,6 +17,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { renderMarkdown } from '@/lib/markdown'
 import { CompleteButton } from '@/components/learning/complete-button'
+import { QuizForm } from '@/components/quiz/quiz-form'
 import type { LessonForMember } from '@/features/learning/queries'
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
@@ -361,10 +362,30 @@ export default async function AulaPage({
         <LessonViewer lesson={lesson} />
       </Card>
 
-      {/* Complete button */}
-      <div className="flex justify-end border-t border-border pt-4">
-        <CompleteButton lessonId={lesson.id} isCompleted={lesson.completed} />
-      </div>
+      {/* Quiz or complete button */}
+      {lesson.quiz ? (
+        <section aria-label="Quiz da aula">
+          <QuizForm
+            quiz={lesson.quiz}
+            lessonId={lesson.id}
+            initialResult={
+              lesson.lastAttempt
+                ? {
+                    score: lesson.lastAttempt.score,
+                    passed: lesson.lastAttempt.passed,
+                    correctCount: lesson.lastAttempt.correctCount,
+                    totalQuestions: lesson.lastAttempt.totalQuestions,
+                    passingScore: lesson.lastAttempt.passingScore,
+                  }
+                : null
+            }
+          />
+        </section>
+      ) : (
+        <div className="flex justify-end border-t border-border pt-4">
+          <CompleteButton lessonId={lesson.id} isCompleted={lesson.completed} />
+        </div>
+      )}
 
       {/* Prev/Next navigation */}
       <LessonNav prevLessonId={lesson.prevLessonId} nextLessonId={lesson.nextLessonId} />

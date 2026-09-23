@@ -21,7 +21,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 8 | Trilhas | P2 | 6 | ✅ |
 | 9 | Aulas | P2 | 8 | ✅ |
 | 10 | Progresso (start/complete) | P2 | 9 | ✅ |
-| 11 | Quiz | P3 | 10 | ⬜ |
+| 11 | Quiz | P3 | 10 | ✅ |
 | 12 | XP e níveis | P4 | 10, 11 | ⬜ |
 | 13 | Conquistas | P4 | 12 | ⬜ |
 | 14 | Admin | P5 | 5, 6 | ⬜ |
@@ -225,16 +225,20 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - `eslint.config.mjs`: adicionado `argsIgnorePattern: '^_'` para `no-unused-vars` (convensão padrão).
 - `_complete_lesson_internal` sem GRANT para nenhuma role — só chamável por funções SECURITY DEFINER.
 
-### FASE 11 — Quiz  ⬜
+### FASE 11 — Quiz  ✅
 **Tarefas**
-- [ ] Migration 0010: `submit_quiz`, `validate_quiz`
-- [ ] `QuizForm`, `QuizResult` com revisão; última tentativa exibida ao voltar
-- [ ] `complete_lesson` rejeita aula com quiz não aprovado
+- [x] Migration 0010: `submit_quiz` (SECURITY DEFINER, correção server-side)
+- [x] `QuizForm`, `QuizResult` com revisão; última tentativa exibida ao voltar
+- [x] `complete_lesson` rejeita aula com quiz não aprovado (QUIZ_REQUIRED guard)
 
 **Concluída quando**
-- pgTAP: correção no servidor; respostas inválidas rejeitadas; tentativas registradas (aprovadas e reprovadas).
-- Gabarito não aparece em nenhuma resposta de rede antes do envio (E2E inspeciona payload).
-- E2E: reprovar → mensagem “Você precisa atingir X%…” → refazer → aprovar → aula concluída.
+- [x] pgTAP: 124 testes (29 novos) — correção server-side, inválidos rejeitados, tentativas registradas.
+- [x] Gabarito não aparece em nenhuma resposta antes do envio (E2E verifica payload de rede).
+- [x] E2E: reprovar → fail message → refazer → aprovar → aula concluída.
+
+**Notas**
+- `is_correct` nunca sai do servidor: query usa admin client com SELECT explícito sem `is_correct`; RLS bloqueia SELECT de `quiz_options` para members.
+- `submit_quiz` chama `_complete_lesson_internal` automaticamente quando passed=true.
 
 ### FASE 12 — XP e níveis  ⬜
 **Tarefas**

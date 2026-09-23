@@ -3,10 +3,33 @@
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/auth/guards'
+import { z } from 'zod'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type ActionResult = { ok: true } | { ok: false; error: string }
+
+export type QuizActionResult =
+  | { ok: true; score: number; passed: boolean; correctCount: number; totalQuestions: number; passingScore: number }
+  | { ok: false; error: string }
+
+// ─── Schemas ─────────────────────────────────────────────────────────────────
+
+// UUID regex — accepts all 8-4-4-4-12 hex patterns (including non-standard versions
+// used in test seeds). Zod's built-in .uuid() requires RFC 4122 version bits.
+const uuidSchema = z
+  .string()
+  .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, 'Invalid UUID')
+
+const answerSchema = z.object({
+  questionId: uuidSchema,
+  optionId: uuidSchema,
+})
+
+const submitQuizSchema = z.object({
+  quizId: uuidSchema,
+  answers: z.array(answerSchema).min(1).max(100),
+})
 
 // ─── Actions ─────────────────────────────────────────────────────────────────
 
@@ -60,6 +83,79 @@ export async function completeLesson(lessonId: string): Promise<ActionResult> {
     return { ok: true }
   } catch (err) {
     console.error('[completeLesson] unexpected error:', err)
+    return { ok: false, error: 'Ocorreu um erro inesperado. Tente novamente.' }
+  }
+}
+
+/**
+ * Submits quiz answers by calling the `submit_quiz` RPC.
+ * All answer checking happens server-side (is_correct is NEVER sent to client).
+ * Returns the score, passed status, and counts on success.
+ *
+ * Security: requireUser() ensures only authenticated users can call this.
+ * The RPC validates quiz access, answer integrity, and records the attempt.
+ */
+export async function submitQuiz(
+  quizId: string,
+  answers: { questionId: string; optionId: string }[],
+): Promise<QuizActionResult> {
+  try {
+    await requireUser()
+
+    // Validate inputs with Zod before sending to DB
+    const parsed = submitQuizSchema.safeParse({ quizId, answers })
+    if (!parsed.success) {
+      return { ok: false, error: 'Dados inválidos. Verifique suas respostas e tente novamente.' }
+    }
+
+    const supabase = await createServerClient()
+
+    // Convert camelCase answers to snake_case for the RPC
+    const rpcAnswers = parsed.data.answers.map((a) => ({
+      question_id: a.questionId,
+      option_id: a.optionId,
+    }))
+
+    const { data, error } = await supabase.rpc('submit_quiz', {
+      p_quiz_id: parsed.data.quizId,
+      p_answers: rpcAnswers,
+    })
+
+    if (error) {
+      const msg = error.message ?? ''
+      if (msg.includes('NO_ACCESS')) {
+        return { ok: false, error: 'Você não tem acesso a este quiz.' }
+      }
+      if (msg.includes('INVALID_ANSWERS')) {
+        return { ok: false, error: 'Respostas inválidas. Responda todas as questões e tente novamente.' }
+      }
+      console.error('[submitQuiz] RPC error:', error.message)
+      return { ok: false, error: 'Não foi possível enviar as respostas. Tente novamente.' }
+    }
+
+    const result = data as {
+      score: number
+      passed: boolean
+      correct_count: number
+      total_questions: number
+      passing_score: number
+    }
+
+    // Revalidate lesson page to reflect updated attempt state
+    revalidatePath(`/aula/${quizId}`)
+    revalidatePath('/dashboard')
+    revalidatePath('/trilhas')
+
+    return {
+      ok: true,
+      score: result.score,
+      passed: result.passed,
+      correctCount: result.correct_count,
+      totalQuestions: result.total_questions,
+      passingScore: result.passing_score,
+    }
+  } catch (err) {
+    console.error('[submitQuiz] unexpected error:', err)
     return { ok: false, error: 'Ocorreu um erro inesperado. Tente novamente.' }
   }
 }
