@@ -790,10 +790,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_user_path_access: {
+        Row: {
+          learning_path_id: string | null
+          user_id: string | null
+          via: string | null
+        }
+        Relationships: []
+      }
+      v_user_path_progress: {
+        Row: {
+          completed_at: string | null
+          last_accessed_at: string | null
+          learning_path_id: string | null
+          percent: number | null
+          required_done: number | null
+          required_total: number | null
+          started_at: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      _complete_lesson_internal: {
+        Args: { p_lesson_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      can_access_lesson: {
+        Args: { p_lesson: string; p_user?: string }
+        Returns: boolean
+      }
+      can_access_path: {
+        Args: { p_path: string; p_user?: string }
+        Returns: boolean
+      }
+      complete_lesson: { Args: { p_lesson_id: string }; Returns: Json }
+      get_setting: { Args: { p_key: string }; Returns: number }
+      is_active_user: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      is_lesson_unlocked: {
+        Args: { p_lesson: string; p_user?: string }
+        Returns: boolean
+      }
+      level_for_xp: {
+        Args: { p_xp: number }
+        Returns: {
+          level: number
+          min_xp: number
+          next_min_xp: number
+        }[]
+      }
+      start_lesson: { Args: { p_lesson_id: string }; Returns: undefined }
+      user_total_xp: { Args: { p_user: string }; Returns: number }
     }
     Enums: {
       lesson_type: "text" | "video" | "pdf" | "link" | "embed"

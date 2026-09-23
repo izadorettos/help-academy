@@ -677,6 +677,21 @@ export async function getLessonForMember(
     signedPdfUrl = signedData?.signedUrl ?? null
   }
 
+  // 6. Fire-and-forget: call start_lesson to track last_accessed_at.
+  // Only call when the lesson is not locked (RPC would throw LESSON_LOCKED otherwise).
+  // Errors are intentionally swallowed — this must not fail the page load.
+  if (!locked) {
+    void Promise.resolve(
+      supabase.rpc('start_lesson', { p_lesson_id: lessonId }),
+    ).then(({ error }) => {
+      if (error) {
+        console.error('[getLessonForMember] start_lesson error:', error.message)
+      }
+    }).catch((err: unknown) => {
+      console.error('[getLessonForMember] start_lesson unexpected error:', err)
+    })
+  }
+
   return {
     id: String(lessonRow.id),
     title: String(lessonRow.title),

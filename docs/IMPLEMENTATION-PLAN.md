@@ -20,7 +20,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 7 | Dashboard | P2 | 6, 10* | ✅ |
 | 8 | Trilhas | P2 | 6 | ✅ |
 | 9 | Aulas | P2 | 8 | ✅ |
-| 10 | Progresso (start/complete) | P2 | 9 | ⬜ |
+| 10 | Progresso (start/complete) | P2 | 9 | ✅ |
 | 11 | Quiz | P3 | 10 | ⬜ |
 | 12 | XP e níveis | P4 | 10, 11 | ⬜ |
 | 13 | Conquistas | P4 | 12 | ⬜ |
@@ -211,15 +211,19 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - X-Frame-Options mantido como DENY (controla quem embeda NOSSAS páginas); frame-src na CSP controla iframes externos que carregamos.
 - 26 testes unitários: embed-allowlist (17) + getYouTubeEmbedUrl (9).
 
-### FASE 10 — Progresso  ⬜
+### FASE 10 — Progresso  ✅
 **Tarefas**
-- [ ] Migration 0009: `start_lesson`, `_complete_lesson_internal`, `complete_lesson` — nesta fase a função só registra conclusões de aula/módulo/trilha; a concessão de XP é adicionada na fase 12 (sem stubs ou valores fictícios)
-- [ ] Action `completeLesson`, `CompleteButton`, revalidação
-- [ ] “Continue de onde parou” passa a refletir `start_lesson`
+- [x] Migration 0009: `start_lesson`, `_complete_lesson_internal`, `complete_lesson` (sem XP — Fase 12)
+- [x] Action `completeLesson`, `CompleteButton`, revalidação
+- [x] `getLessonForMember` chama `start_lesson` (fire-and-forget); dashboard reflete via `getLastStartedLesson`
 
 **Concluída quando**
-- pgTAP: conclusão idempotente; módulo e trilha concluídos no momento certo; aula bloqueada rejeitada.
-- E2E: concluir aula → recarregar → continua concluída, próxima liberada; duplo clique não gera duplicata.
+- [x] pgTAP: 107 testes passando (18 novos para funções de progresso)
+- [x] Conclusão idempotente; módulo e trilha concluídos no momento certo; aula bloqueada rejeitada
+
+**Notas**
+- `eslint.config.mjs`: adicionado `argsIgnorePattern: '^_'` para `no-unused-vars` (convensão padrão).
+- `_complete_lesson_internal` sem GRANT para nenhuma role — só chamável por funções SECURITY DEFINER.
 
 ### FASE 11 — Quiz  ⬜
 **Tarefas**

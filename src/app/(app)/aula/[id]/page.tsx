@@ -16,6 +16,7 @@ import { isAllowedEmbed, getYouTubeEmbedUrl } from '@/lib/embed-allowlist'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { renderMarkdown } from '@/lib/markdown'
+import { CompleteButton } from '@/components/learning/complete-button'
 import type { LessonForMember } from '@/features/learning/queries'
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
@@ -359,6 +360,11 @@ export default async function AulaPage({
       <Card className="p-6">
         <LessonViewer lesson={lesson} />
       </Card>
+
+      {/* Complete button */}
+      <div className="flex justify-end border-t border-border pt-4">
+        <CompleteButton lessonId={lesson.id} isCompleted={lesson.completed} />
+      </div>
 
       {/* Prev/Next navigation */}
       <LessonNav prevLessonId={lesson.prevLessonId} nextLessonId={lesson.nextLessonId} />
