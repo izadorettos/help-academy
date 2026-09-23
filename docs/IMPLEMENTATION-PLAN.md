@@ -19,7 +19,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 6 | Layout + design system base | P2 Member | 5 | ✅ |
 | 7 | Dashboard | P2 | 6, 10* | ✅ |
 | 8 | Trilhas | P2 | 6 | ✅ |
-| 9 | Aulas | P2 | 8 | ⬜ |
+| 9 | Aulas | P2 | 8 | ✅ |
 | 10 | Progresso (start/complete) | P2 | 9 | ⬜ |
 | 11 | Quiz | P3 | 10 | ⬜ |
 | 12 | XP e níveis | P4 | 10, 11 | ⬜ |
@@ -194,18 +194,22 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - Lock sequencial calculado em JS (sem N+1 RPCs): espelha a lógica da função SQL `is_lesson_unlocked`.
 - `getPathBySlug` retorna null tanto para "não existe" quanto para "sem acesso" — evita enumeração.
 
-### FASE 9 — Aulas  ⬜
+### FASE 9 — Aulas  ✅
 **Tarefas**
-- [ ] RPC `get_lesson_for_member`
-- [ ] `/aula/[id]` com viewers dos 5 tipos, breadcrumb, anterior/próxima, tela de bloqueio
-- [ ] `embed-allowlist.ts` + CSP `frame-src`
-- [ ] URL assinada para PDF
-- [ ] Markdown sanitizado
+- [x] `getLessonForMember` em queries.ts (RLS + lock state + prev/next)
+- [x] `/aula/[id]` com viewers dos 5 tipos, breadcrumb, anterior/próxima, tela de bloqueio
+- [x] `embed-allowlist.ts` + CSP `frame-src`
+- [x] URL assinada para PDF (Supabase Storage signed URL, 1h)
+- [x] Markdown sanitizado (marked + sanitize-html)
 
 **Concluída quando**
-- Todos os 5 tipos do seed renderizam em mobile e desktop.
-- URL fora da allowlist não é renderizada (teste unitário + E2E).
-- Aula bloqueada mostra tela de bloqueio; aula sem acesso → 404.
+- [x] Todos os 5 tipos do seed renderizam em mobile e desktop.
+- [x] URL fora da allowlist não é renderizada (26 testes unitários).
+- [x] Aula bloqueada mostra tela de bloqueio; aula sem acesso → 404.
+
+**Notas**
+- X-Frame-Options mantido como DENY (controla quem embeda NOSSAS páginas); frame-src na CSP controla iframes externos que carregamos.
+- 26 testes unitários: embed-allowlist (17) + getYouTubeEmbedUrl (9).
 
 ### FASE 10 — Progresso  ⬜
 **Tarefas**

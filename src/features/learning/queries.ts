@@ -6,6 +6,7 @@ import {
   type OverallProgress,
 } from '@/features/learning/progress'
 import type { Database } from '@/types/database.types'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -489,5 +490,221 @@ export async function getPathBySlug(
     percent,
     status,
     modules,
+  }
+}
+
+// ─── Lesson viewer ────────────────────────────────────────────────────────────
+
+export interface LessonForMember {
+  id: string
+  title: string
+  description: string | null
+  contentType: LessonType
+  content: string | null
+  externalUrl: string | null
+  filePath: string | null
+  estimatedMinutes: number | null
+  required: boolean
+  position: number
+  /** true when the lesson exists and is published but the sequential rule blocks access */
+  locked: boolean
+  /** true when lesson_progress.completed_at is not null */
+  completed: boolean
+  completedAt: string | null
+  startedAt: string | null
+  /** Signed URL for PDF lessons (expires in 1 hour) */
+  signedPdfUrl: string | null
+  module: {
+    id: string
+    title: string
+    position: number
+  }
+  path: {
+    id: string
+    title: string
+    slug: string
+    sequential: boolean
+  }
+  prevLessonId: string | null
+  nextLessonId: string | null
+}
+
+/**
+ * Returns lesson data for the member viewer, including breadcrumb info,
+ * locked/completed state, prev/next navigation, and signed PDF URL if applicable.
+ *
+ * Returns null when the lesson does not exist, is not published, or the user
+ * cannot access the path it belongs to (RLS enforces this).
+ *
+ * If the lesson is locked (sequential path, prior required lessons incomplete),
+ * returns the lesson with `locked: true` so the UI can show the lock screen.
+ */
+export async function getLessonForMember(
+  lessonId: string,
+  userId: string,
+): Promise<LessonForMember | null> {
+  const supabase = await createServerClient()
+
+  // 1. Fetch the lesson with its module and path info
+  // RLS on lessons: member can SELECT published lessons where can_access_path holds
+  const { data: lessonRow, error: lessonError } = await supabase
+    .from('lessons')
+    .select(
+      `id, title, description, content_type, content, external_url, file_path,
+       estimated_minutes, required, position, published,
+       modules!inner(
+         id, title, position,
+         learning_paths!inner(
+           id, title, slug, sequential, status
+         )
+       )`,
+    )
+    .eq('id', lessonId)
+    .eq('published', true)
+    .single()
+
+  if (lessonError || !lessonRow) return null
+
+  const mod = lessonRow.modules as {
+    id: string
+    title: string
+    position: number
+    learning_paths: {
+      id: string
+      title: string
+      slug: string
+      sequential: boolean
+      status: string
+    }
+  }
+
+  // Path must be published
+  if (mod.learning_paths.status !== 'published') return null
+
+  // 2. Fetch lesson progress for this user
+  const { data: progressRow } = await supabase
+    .from('lesson_progress')
+    .select('started_at, completed_at, last_accessed_at')
+    .eq('user_id', userId)
+    .eq('lesson_id', lessonId)
+    .maybeSingle()
+
+  // 3. Determine if lesson is locked (only relevant for sequential paths)
+  let locked = false
+  if (mod.learning_paths.sequential && lessonRow.required) {
+    // Fetch all required published lessons in this path ordered by module.position, lesson.position
+    const { data: allLessonsInPath } = await supabase
+      .from('lessons')
+      .select(
+        `id, position, required, published,
+         modules!inner(position, learning_path_id)`,
+      )
+      .eq('modules.learning_path_id' as never, mod.learning_paths.id)
+      .eq('published', true)
+      .eq('required', true)
+
+    if (allLessonsInPath && allLessonsInPath.length > 0) {
+      // Sort by module position then lesson position
+      const sorted = (
+        allLessonsInPath as Array<{
+          id: string
+          position: number
+          required: boolean
+          published: boolean
+          modules: { position: number; learning_path_id: string }
+        }>
+      )
+        .slice()
+        .sort((a, b) => {
+          const modDiff = a.modules.position - b.modules.position
+          return modDiff !== 0 ? modDiff : a.position - b.position
+        })
+
+      const currentIndex = sorted.findIndex((l) => l.id === lessonId)
+      if (currentIndex > 0) {
+        // Fetch completion status for lessons before this one
+        const priorIds = sorted.slice(0, currentIndex).map((l) => l.id)
+        const { data: completedPrior } = await supabase
+          .from('lesson_progress')
+          .select('lesson_id')
+          .eq('user_id', userId)
+          .not('completed_at', 'is', null)
+          .in('lesson_id', priorIds)
+
+        const completedSet = new Set((completedPrior ?? []).map((p) => p.lesson_id))
+        locked = priorIds.some((id) => !completedSet.has(id))
+      }
+    }
+  }
+
+  // 4. Fetch previous and next lesson IDs in the same path
+  // Prev/next navigate across all published lessons in the path (ordered by module.position, lesson.position)
+  const { data: allLessonsForNav } = await supabase
+    .from('lessons')
+    .select(`id, position, modules!inner(position, learning_path_id)`)
+    .eq('modules.learning_path_id' as never, mod.learning_paths.id)
+    .eq('published', true)
+
+  let prevLessonId: string | null = null
+  let nextLessonId: string | null = null
+
+  if (allLessonsForNav && allLessonsForNav.length > 0) {
+    const sortedNav = (
+      allLessonsForNav as Array<{
+        id: string
+        position: number
+        modules: { position: number; learning_path_id: string }
+      }>
+    )
+      .slice()
+      .sort((a, b) => {
+        const modDiff = a.modules.position - b.modules.position
+        return modDiff !== 0 ? modDiff : a.position - b.position
+      })
+
+    const idx = sortedNav.findIndex((l) => l.id === lessonId)
+    if (idx > 0) prevLessonId = sortedNav[idx - 1]!.id
+    if (idx >= 0 && idx < sortedNav.length - 1) nextLessonId = sortedNav[idx + 1]!.id
+  }
+
+  // 5. Generate signed URL for PDF lessons
+  let signedPdfUrl: string | null = null
+  if (lessonRow.content_type === 'pdf' && lessonRow.file_path) {
+    const adminClient = createAdminClient()
+    const { data: signedData } = await adminClient.storage
+      .from('lesson-files')
+      .createSignedUrl(lessonRow.file_path, 3600)
+    signedPdfUrl = signedData?.signedUrl ?? null
+  }
+
+  return {
+    id: String(lessonRow.id),
+    title: String(lessonRow.title),
+    description: lessonRow.description != null ? String(lessonRow.description) : null,
+    contentType: lessonRow.content_type as LessonType,
+    content: lessonRow.content ?? null,
+    externalUrl: lessonRow.external_url ?? null,
+    filePath: lessonRow.file_path ?? null,
+    estimatedMinutes: lessonRow.estimated_minutes ?? null,
+    required: Boolean(lessonRow.required),
+    position: Number(lessonRow.position),
+    locked,
+    completed: progressRow?.completed_at != null,
+    completedAt: progressRow?.completed_at ?? null,
+    startedAt: progressRow?.started_at ?? null,
+    signedPdfUrl,
+    module: {
+      id: String(mod.id),
+      title: String(mod.title),
+      position: Number(mod.position),
+    },
+    path: {
+      id: String(mod.learning_paths.id),
+      title: String(mod.learning_paths.title),
+      slug: String(mod.learning_paths.slug),
+      sequential: Boolean(mod.learning_paths.sequential),
+    },
+    prevLessonId,
+    nextLessonId,
   }
 }
