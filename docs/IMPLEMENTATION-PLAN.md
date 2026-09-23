@@ -24,7 +24,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 11 | Quiz | P3 | 10 | ✅ |
 | 12 | XP e níveis | P4 | 10, 11 | ✅ |
 | 13 | Conquistas | P4 | 12 | ✅ |
-| 14 | Admin | P5 | 5, 6 | ⬜ |
+| 14 | Admin | P5 | 5, 6 | 🔄 |
 | 15 | Relatórios | P6 | 14 | ⬜ |
 | 16 | Testes (endurecimento) | — | todas | ⬜ |
 | 17 | Deploy | — | 16 | ⬜ |
