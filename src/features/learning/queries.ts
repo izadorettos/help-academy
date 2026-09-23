@@ -5,11 +5,50 @@ import {
   type PathStatus,
   type OverallProgress,
 } from '@/features/learning/progress'
+import type { Database } from '@/types/database.types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type { PathStatus, OverallProgress } from '@/features/learning/progress'
 export { computeOverallProgress } from '@/features/learning/progress'
+
+type LessonType = Database['public']['Enums']['lesson_type']
+
+export type LessonState = 'locked' | 'available' | 'completed'
+
+export interface PathLesson {
+  id: string
+  title: string
+  contentType: LessonType
+  estimatedMinutes: number | null
+  required: boolean
+  position: number
+  state: LessonState
+  completedAt: string | null
+}
+
+export interface PathModule {
+  id: string
+  title: string
+  description: string | null
+  position: number
+  lessons: PathLesson[]
+}
+
+export interface PathDetail {
+  id: string
+  title: string
+  description: string | null
+  slug: string
+  coverUrl: string | null
+  required: boolean
+  sequential: boolean
+  requiredTotal: number
+  requiredDone: number
+  percent: number
+  status: PathStatus
+  modules: PathModule[]
+}
 
 export interface UserPath {
   id: string
@@ -281,4 +320,174 @@ export async function getLastStartedLesson(userId: string): Promise<LastStartedL
   }
 
   return null
+}
+
+/**
+ * Returns the full detail of a learning path accessible to the user,
+ * including all published modules and lessons with their progress state.
+ * Returns null if the path does not exist or the user cannot access it
+ * (RLS enforces access — the query will return no rows for inaccessible paths).
+ */
+export async function getPathBySlug(
+  slug: string,
+  userId: string,
+): Promise<PathDetail | null> {
+  const supabase = await createServerClient()
+
+  // 1. Fetch the path (RLS: only published paths the user can access)
+  const { data: pathRow, error: pathError } = await supabase
+    .from('learning_paths')
+    .select(
+      `id, title, description, slug, cover_url, required, sequential, position,
+       modules(
+         id, title, description, position,
+         lessons(
+           id, title, content_type, estimated_minutes, required, position, published
+         )
+       )`,
+    )
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .single()
+
+  if (pathError || !pathRow) return null
+
+  // 2. Fetch lesson_progress for this user (only for lessons in this path)
+  const allLessons = (
+    pathRow.modules as Array<{
+      id: string
+      lessons: Array<{ id: string }>
+    }>
+  ).flatMap((m) => m.lessons.map((l) => l.id))
+
+  const { data: progressRows } = await supabase
+    .from('lesson_progress')
+    .select('lesson_id, completed_at')
+    .eq('user_id', userId)
+    .in('lesson_id', allLessons.length > 0 ? allLessons : ['00000000-0000-0000-0000-000000000000'])
+
+  const completedMap = new Map<string, string | null>(
+    (progressRows ?? []).map((p) => [p.lesson_id, p.completed_at]),
+  )
+
+  // 3. Sort modules and lessons by position
+  const sortedModules = (
+    pathRow.modules as Array<{
+      id: string
+      title: string
+      description: string | null
+      position: number
+      lessons: Array<{
+        id: string
+        title: string
+        content_type: LessonType
+        estimated_minutes: number | null
+        required: boolean
+        position: number
+        published: boolean
+      }>
+    }>
+  )
+    .slice()
+    .sort((a, b) => a.position - b.position)
+    .map((m) => ({
+      ...m,
+      lessons: m.lessons.slice().sort((a, b) => a.position - b.position),
+    }))
+
+  // 4. Compute lesson states
+  // For sequential paths: a required lesson at position N is locked until all
+  // required published lessons before it (across all modules in order) are completed.
+  // Optional lessons are never locked.
+  const sequential = Boolean(pathRow.sequential)
+
+  // Build a flat ordered list of required published lessons across all modules
+  const orderedRequiredLessons: string[] = sortedModules.flatMap((m) =>
+    m.lessons.filter((l) => l.published && l.required).map((l) => l.id),
+  )
+
+  // For sequential: find the index of first incomplete required lesson
+  // All required lessons at a higher index than that are locked.
+  let firstIncompleteRequiredIndex = orderedRequiredLessons.length // all done by default
+  if (sequential) {
+    for (let i = 0; i < orderedRequiredLessons.length; i++) {
+      const lessonId = orderedRequiredLessons[i]
+      if (!lessonId) continue
+      const completedAt = completedMap.get(lessonId)
+      if (!completedAt) {
+        firstIncompleteRequiredIndex = i
+        break
+      }
+    }
+  }
+
+  const getLessonState = (lesson: {
+    id: string
+    required: boolean
+    published: boolean
+  }): LessonState => {
+    if (!lesson.published) return 'locked'
+
+    const completedAt = completedMap.get(lesson.id)
+    if (completedAt) return 'completed'
+
+    if (sequential && lesson.required) {
+      // A required lesson is locked if there's any incomplete required lesson before it
+      const idx = orderedRequiredLessons.indexOf(lesson.id)
+      if (idx > firstIncompleteRequiredIndex) return 'locked'
+    }
+
+    return 'available'
+  }
+
+  // 5. Count required/done for progress
+  const publishedRequiredLessons = sortedModules.flatMap((m) =>
+    m.lessons.filter((l) => l.published && l.required),
+  )
+  const requiredTotal = publishedRequiredLessons.length
+  const requiredDone = publishedRequiredLessons.filter(
+    (l) => completedMap.has(l.id) && completedMap.get(l.id) !== null,
+  ).length
+  const percent = requiredTotal === 0 ? 0 : Math.floor((requiredDone / requiredTotal) * 100)
+
+  let status: PathStatus = 'not_started'
+  if (requiredDone === requiredTotal && requiredTotal > 0) status = 'completed'
+  else if (requiredDone > 0) status = 'in_progress'
+  // also check if any lesson has been started
+  else if (allLessons.some((id) => completedMap.has(id))) status = 'in_progress'
+
+  // 6. Build the result
+  const modules: PathModule[] = sortedModules.map((m) => ({
+    id: m.id,
+    title: m.title,
+    description: m.description,
+    position: m.position,
+    lessons: m.lessons
+      .filter((l) => l.published) // members only see published lessons
+      .map((l) => ({
+        id: l.id,
+        title: l.title,
+        contentType: l.content_type,
+        estimatedMinutes: l.estimated_minutes,
+        required: l.required,
+        position: l.position,
+        state: getLessonState(l),
+        completedAt: completedMap.get(l.id) ?? null,
+      })),
+  }))
+
+  return {
+    id: String(pathRow.id),
+    title: String(pathRow.title),
+    description: pathRow.description != null ? String(pathRow.description) : null,
+    slug: String(pathRow.slug),
+    coverUrl: pathRow.cover_url != null ? String(pathRow.cover_url) : null,
+    required: Boolean(pathRow.required),
+    sequential,
+    requiredTotal,
+    requiredDone,
+    percent,
+    status,
+    modules,
+  }
 }

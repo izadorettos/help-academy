@@ -18,7 +18,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 5 | Auth | P1 Infra / P2 | 4 | ✅ |
 | 6 | Layout + design system base | P2 Member | 5 | ✅ |
 | 7 | Dashboard | P2 | 6, 10* | ✅ |
-| 8 | Trilhas | P2 | 6 | ⬜ |
+| 8 | Trilhas | P2 | 6 | ✅ |
 | 9 | Aulas | P2 | 8 | ⬜ |
 | 10 | Progresso (start/complete) | P2 | 9 | ⬜ |
 | 11 | Quiz | P3 | 10 | ⬜ |
@@ -180,15 +180,19 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - `features/learning/progress.ts` contém lógica pura de cálculo de progresso geral (RN-05).
 - 8 testes unitários em `tests/unit/overall-progress.test.ts`.
 
-### FASE 8 — Trilhas  ⬜
+### FASE 8 — Trilhas  ✅
 **Tarefas**
-- [ ] `/trilhas` com Tabs de status
-- [ ] `/trilhas/[slug]` com módulos, aulas, estados ✓ → 🔒, XP disponível
-- [ ] 404 para trilha não acessível
+- [x] `/trilhas` com Tabs de status (filtro por `?status=` searchParam, server-rendered)
+- [x] `/trilhas/[slug]` com módulos, aulas, estados ✓ → 🔒, XP disponível
+- [x] 404 para trilha não acessível (RLS + notFound())
 
 **Concluída quando**
-- E2E: membro abre trilha atribuída; URL de trilha de outra área → 404.
-- Trilha sequencial mostra bloqueios corretos (conferido com `is_lesson_unlocked`).
+- [x] E2E: membro abre trilha atribuída; URL de trilha de outra área → 404.
+- [x] Trilha sequencial mostra bloqueios corretos (lógica em JS a partir de lesson_progress).
+
+**Notas**
+- Lock sequencial calculado em JS (sem N+1 RPCs): espelha a lógica da função SQL `is_lesson_unlocked`.
+- `getPathBySlug` retorna null tanto para "não existe" quanto para "sem acesso" — evita enumeração.
 
 ### FASE 9 — Aulas  ⬜
 **Tarefas**
