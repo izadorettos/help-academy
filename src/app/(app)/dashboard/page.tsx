@@ -4,13 +4,16 @@ import { BookOpen, LayoutDashboard, Play } from 'lucide-react'
 import { requireUser } from '@/lib/auth/guards'
 import { getUserPaths, getOverallProgress, getLastStartedLesson } from '@/features/learning/queries'
 import { getProfile } from '@/features/profile/queries'
+import { getRecentAchievements } from '@/features/gamification/queries'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { ProgressRing } from '@/components/ui/progress-ring'
 import { EmptyState } from '@/components/ui/empty-state'
 import { LevelBadge } from '@/components/gamification/level-badge'
+import { AchievementIcon } from '@/components/gamification/achievement-icon'
 import type { PathStatus, UserPath } from '@/features/learning/queries'
+import type { RecentAchievement } from '@/features/gamification/queries'
 
 export const metadata: Metadata = { title: 'Dashboard — Help Academy' }
 
@@ -73,16 +76,41 @@ function PathCard({ path }: { path: UserPath }) {
   )
 }
 
+// ─── Recent achievements sub-component ───────────────────────────────────────
+
+function RecentAchievementCard({ achievement }: { achievement: RecentAchievement }) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3">
+      <div
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand"
+        aria-hidden
+      >
+        <AchievementIcon iconName={achievement.icon} className="size-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-medium leading-snug truncate">{achievement.name}</p>
+        <p className="text-xs text-text-subtle truncate">
+          {new Date(achievement.earnedAt).toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: 'short',
+          })}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
   const user = await requireUser()
 
-  const [paths, overall, lastLesson, profile] = await Promise.all([
+  const [paths, overall, lastLesson, profile, recentAchievements] = await Promise.all([
     getUserPaths(user.id),
     getOverallProgress(user.id),
     getLastStartedLesson(user.id),
     getProfile(user.id),
+    getRecentAchievements(user.id, 3),
   ])
 
   return (
@@ -138,6 +166,28 @@ export default async function DashboardPage() {
           </div>
         </Card>
       </section>
+
+      {/* ── Recent achievements ── */}
+      {recentAchievements.length > 0 && (
+        <section aria-label="Conquistas recentes">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-h3 font-semibold">Conquistas recentes</h2>
+            <Link
+              href="/conquistas"
+              className="text-sm font-medium text-brand hover:underline underline-offset-2"
+            >
+              Ver todas
+            </Link>
+          </div>
+          <ul className="grid gap-3 sm:grid-cols-3" aria-label="Lista de conquistas recentes">
+            {recentAchievements.map((ach) => (
+              <li key={ach.id}>
+                <RecentAchievementCard achievement={ach} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* ── Continue where you left off ── */}
       {lastLesson && (

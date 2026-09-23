@@ -4,7 +4,9 @@ import { CheckCircle2, XCircle, RotateCcw, Loader2 } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { Card } from '@/components/ui/card'
 import { RewardToast } from '@/components/gamification/reward-toast'
+import { AchievementToast } from '@/components/gamification/achievement-toast'
 import { completeLesson } from '@/features/learning/actions'
+import type { UnlockedAchievement } from '@/features/learning/actions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -15,6 +17,7 @@ export interface QuizResultData {
   totalQuestions: number
   passingScore: number
   xpEarned?: number
+  achievementsUnlocked?: UnlockedAchievement[]
 }
 
 interface QuizResultProps {
@@ -29,18 +32,21 @@ export function QuizResult({ result, lessonId, onRetry }: QuizResultProps) {
   const [isPending, startTransition] = useTransition()
   const [lessonConcluded, setLessonConcluded] = useState(false)
   const [toastXp, setToastXp] = useState(0)
+  const [toastAchievements, setToastAchievements] = useState<UnlockedAchievement[]>([])
 
   const { score, passed, correctCount, totalQuestions, passingScore } = result
 
   // XP from quiz submission (passed in via result.xpEarned)
   // Additional XP from explicit "Concluir aula" button is accumulated here
   const quizXp = result.xpEarned ?? 0
+  const quizAchievements = result.achievementsUnlocked ?? []
 
   function handleConcluir() {
     startTransition(async () => {
       const res = await completeLesson(lessonId)
-      if (res.ok && res.xpEarned > 0) {
-        setToastXp(res.xpEarned)
+      if (res.ok) {
+        if (res.xpEarned > 0) setToastXp(res.xpEarned)
+        if (res.achievementsUnlocked.length > 0) setToastAchievements(res.achievementsUnlocked)
       }
       setLessonConcluded(true)
     })
@@ -64,6 +70,7 @@ export function QuizResult({ result, lessonId, onRetry }: QuizResultProps) {
           </div>
         </Card>
         <RewardToast xpEarned={toastXp} onDismiss={() => setToastXp(0)} />
+        <AchievementToast achievements={toastAchievements} onDismiss={() => setToastAchievements([])} />
       </>
     )
   }
@@ -72,6 +79,8 @@ export function QuizResult({ result, lessonId, onRetry }: QuizResultProps) {
     <>
     {/* Show XP toast when quiz was submitted and XP was earned (auto-complete on pass) */}
     <RewardToast xpEarned={quizXp} />
+    {/* Show achievement toasts from quiz submission */}
+    <AchievementToast achievements={quizAchievements} />
     <Card className="p-6 space-y-5">
       {/* Status icon + score */}
       <div className="flex flex-col items-center gap-3 text-center">

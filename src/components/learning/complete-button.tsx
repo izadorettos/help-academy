@@ -3,8 +3,9 @@
 import { useActionState, useState } from 'react'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { completeLesson } from '@/features/learning/actions'
-import type { ActionResult } from '@/features/learning/actions'
+import type { ActionResult, UnlockedAchievement } from '@/features/learning/actions'
 import { RewardToast } from '@/components/gamification/reward-toast'
+import { AchievementToast } from '@/components/gamification/achievement-toast'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -19,12 +20,14 @@ const initialState: ActionResult | null = null
 
 export function CompleteButton({ lessonId, isCompleted }: CompleteButtonProps) {
   const [xpEarned, setXpEarned] = useState(0)
+  const [achievements, setAchievements] = useState<UnlockedAchievement[]>([])
 
   const [state, dispatch, isPending] = useActionState(
     async (_prev: ActionResult | null) => {
       const result = await completeLesson(lessonId)
-      if (result.ok && result.xpEarned > 0) {
-        setXpEarned(result.xpEarned)
+      if (result.ok) {
+        if (result.xpEarned > 0) setXpEarned(result.xpEarned)
+        if (result.achievementsUnlocked.length > 0) setAchievements(result.achievementsUnlocked)
       }
       return result
     },
@@ -46,6 +49,7 @@ export function CompleteButton({ lessonId, isCompleted }: CompleteButtonProps) {
           Aula concluída
         </div>
         <RewardToast xpEarned={xpEarned} onDismiss={() => setXpEarned(0)} />
+        <AchievementToast achievements={achievements} onDismiss={() => setAchievements([])} />
       </>
     )
   }
@@ -80,6 +84,7 @@ export function CompleteButton({ lessonId, isCompleted }: CompleteButtonProps) {
         )}
       </div>
       <RewardToast xpEarned={xpEarned} onDismiss={() => setXpEarned(0)} />
+      <AchievementToast achievements={achievements} onDismiss={() => setAchievements([])} />
     </>
   )
 }

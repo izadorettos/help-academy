@@ -23,7 +23,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 10 | Progresso (start/complete) | P2 | 9 | ✅ |
 | 11 | Quiz | P3 | 10 | ✅ |
 | 12 | XP e níveis | P4 | 10, 11 | ✅ |
-| 13 | Conquistas | P4 | 12 | ⬜ |
+| 13 | Conquistas | P4 | 12 | ✅ |
 | 14 | Admin | P5 | 5, 6 | ⬜ |
 | 15 | Relatórios | P6 | 14 | ⬜ |
 | 16 | Testes (endurecimento) | — | todas | ⬜ |
@@ -255,14 +255,18 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 - `award_xp` idempotente por (user_id, reason, reference_id) — ON CONFLICT DO NOTHING.
 - XP de módulo e trilha concedido apenas na PRIMEIRA conclusão.
 
-### FASE 13 — Conquistas  ⬜
+### FASE 13 — Conquistas  ✅
 **Tarefas**
-- [ ] `evaluate_achievements` com as 5 regras
-- [ ] `/conquistas`, conquistas recentes no dashboard, toast de desbloqueio
+- [x] Migration 0014: `evaluate_achievements` com as 5 regras (ON CONFLICT idempotente)
+- [x] `/conquistas`, conquistas recentes no dashboard, `AchievementToast` no desbloqueio
 
 **Concluída quando**
-- pgTAP: cada conquista desbloqueia exatamente na condição e só uma vez.
-- Membro não consegue inserir `user_achievements` (já coberto na fase 4, reexecutado).
+- [x] pgTAP: 188 testes (21 novos) — cada conquista desbloqueia exatamente na condição e só uma vez.
+- [x] Membro não consegue inserir `user_achievements` diretamente (RLS testado).
+
+**Notas**
+- `evaluate_achievements` chamada ao final de `_complete_lesson_internal` e `submit_quiz`.
+- RPCs retornam `achievements_unlocked: [{id, code, name, icon}]` para o client mostrar toast.
 
 ### FASE 14 — Admin  ⬜
 Subdividir em PRs: 14a Dashboard + Áreas · 14b Usuários · 14c Trilhas + construtor · 14d Aulas + quiz + conteúdos · 14e Configurações.

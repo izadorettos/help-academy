@@ -75,6 +75,8 @@ export function QuizForm({ quiz, lessonId, initialResult = null }: QuizFormProps
           correctCount: res.correctCount,
           totalQuestions: res.totalQuestions,
           passingScore: res.passingScore,
+          xpEarned: res.xpEarned,
+          achievementsUnlocked: res.achievementsUnlocked,
         })
       } else {
         setErrorMessage(res.error)
