@@ -11,7 +11,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 
 | # | Fase | Prioridade da spec | Depende de | Status |
 |---|---|---|---|---|
-| 1 | Setup Next.js | P1 Infra | — | 🟨 bloqueada |
+| 1 | Setup Next.js | P1 Infra | — | ✅ |
 | 2 | Supabase (local + projetos) | P1 Infra | 1 | ⬜ |
 | 3 | Schema | P1 Infra | 2 | ⬜ |
 | 4 | RLS + funções auxiliares | P1 Infra | 3 | ⬜ |
@@ -74,21 +74,20 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 
 ## 4. Fases
 
-### FASE 1 — Setup Next.js  🟨  *(escopo detalhado em §5)*
-> **Bloqueio (23/09/2026):** o ambiente de execução do agente não acessa `registry.npmjs.org` (host fora da allowlist de rede da conta). Todos os arquivos da fase foram escritos, mas `npm install` e, portanto, lint/typecheck/test/build ainda **não foram executados**. A fase só será marcada ✅ após a validação.
+### FASE 1 — Setup Next.js  ✅
 
 **Tarefas**
-- [ ] Criar app Next.js (App Router, TS, Tailwind, ESLint, `src/`, alias `@/*`)
-- [ ] `tsconfig` strict + `noUncheckedIndexedAccess`
-- [ ] Scripts `lint`, `typecheck`, `test`, `test:e2e`, `build`, `format`
-- [ ] Prettier (+ plugin Tailwind) e ESLint sem conflitos
-- [ ] Vitest + 1 teste de sanidade; Playwright + 1 teste de sanidade (página inicial responde)
-- [ ] Estrutura de pastas vazia conforme `ARCHITECTURE.md` §3 (com `.gitkeep` só onde necessário)
-- [ ] `lib/env.ts` (Zod) + `.env.example`
-- [ ] `globals.css` com tokens do design system (provisórios) e fonte via `next/font`
-- [ ] Página `/` temporária com o nome do produto (será redirecionamento na fase 5)
-- [ ] GitHub Actions: install, lint, typecheck, test, build
-- [ ] `README.md` com como rodar
+- [x] Criar app Next.js (App Router, TS, Tailwind, ESLint, `src/`, alias `@/*`)
+- [x] `tsconfig` strict + `noUncheckedIndexedAccess`
+- [x] Scripts `lint`, `typecheck`, `test`, `test:e2e`, `build`, `format`
+- [x] Prettier (+ plugin Tailwind) e ESLint sem conflitos
+- [x] Vitest + 1 teste de sanidade; Playwright + 1 teste de sanidade (página inicial responde)
+- [x] Estrutura de pastas vazia conforme `ARCHITECTURE.md` §3 (com `.gitkeep` só onde necessário)
+- [x] `lib/env.ts` (Zod) + `.env.example`
+- [x] `globals.css` com tokens do design system (provisórios) e fonte via `next/font`
+- [x] Página `/` temporária com o nome do produto (será redirecionamento na fase 5)
+- [x] GitHub Actions: install, lint, typecheck, test, build
+- [x] `README.md` com como rodar
 
 **Concluída quando**
 - `npm run lint`, `typecheck`, `test`, `build` passam localmente e no CI.

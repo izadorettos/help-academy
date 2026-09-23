@@ -17,8 +17,8 @@ describe('parseEnv', () => {
     expect(() => parseEnv(publicEnvSchema, { NEXT_PUBLIC_SITE_URL: 'nao-e-url' })).toThrow(
       EnvValidationError,
     )
-    expect(() =>
-      parseEnv(publicEnvSchema, { NEXT_PUBLIC_SITE_URL: 'ftp://help.com.br' }),
-    ).toThrow(EnvValidationError)
+    expect(() => parseEnv(publicEnvSchema, { NEXT_PUBLIC_SITE_URL: 'ftp://help.com.br' })).toThrow(
+      EnvValidationError,
+    )
   })
 })

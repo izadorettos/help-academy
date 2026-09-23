@@ -21,7 +21,10 @@ export class EnvValidationError extends Error {
   }
 }
 
-export function parseEnv<S extends z.ZodType>(schema: S, source: Record<string, unknown>): z.infer<S> {
+export function parseEnv<S extends z.ZodType>(
+  schema: S,
+  source: Record<string, unknown>,
+): z.infer<S> {
   const result = schema.safeParse(source)
   if (!result.success) {
     throw new EnvValidationError(

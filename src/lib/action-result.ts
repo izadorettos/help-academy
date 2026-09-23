@@ -16,7 +16,10 @@ export function ok<T>(data?: T): ActionSuccess<T | undefined> {
   return { ok: true, data }
 }
 
-export function fail(error: string = GENERIC_ERROR_MESSAGE, fieldErrors?: FieldErrors): ActionFailure {
+export function fail(
+  error: string = GENERIC_ERROR_MESSAGE,
+  fieldErrors?: FieldErrors,
+): ActionFailure {
   return fieldErrors && Object.keys(fieldErrors).length > 0
     ? { ok: false, error, fieldErrors }
     : { ok: false, error }
