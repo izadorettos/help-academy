@@ -12,7 +12,7 @@ export function RecoverForm() {
   if (state?.sent) {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
-        <p className="text-success font-medium">E-mail enviado!</p>
+        <p className="text-success font-medium">Link enviado!</p>
         <p className="text-text-muted text-sm">
           Verifique sua caixa de entrada e clique no link de recuperação.
         </p>
@@ -32,17 +32,17 @@ export function RecoverForm() {
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm font-medium">
-          E-mail
+        <label htmlFor="login" className="text-sm font-medium">
+          Login
         </label>
         <input
-          id="email"
-          name="email"
-          type="email"
+          id="login"
+          name="login"
+          type="text"
           required
-          autoComplete="email"
+          autoComplete="username"
           className="border-border bg-surface text-text focus:border-focus rounded-md border px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-focus/20"
-          placeholder="seu@email.com"
+          placeholder="seu.login"
         />
       </div>
 

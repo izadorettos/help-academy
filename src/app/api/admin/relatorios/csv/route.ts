@@ -1,5 +1,6 @@
-import { createServerClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/auth/guards'
 import { adminGetReport, type ReportStatus, type ReportRow } from '@/features/admin/reports/queries'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 const CSV_HEADERS = [
   'Nome',
@@ -31,9 +32,7 @@ function escapeCsvField(value: string | number | null | undefined): string {
 }
 
 function rowToCsvLine(row: ReportRow): string {
-  const lastAccess = row.lastAccess
-    ? new Date(row.lastAccess).toLocaleDateString('pt-BR')
-    : ''
+  const lastAccess = row.lastAccess ? new Date(row.lastAccess).toLocaleDateString('pt-BR') : ''
 
   const fields = [
     row.userName,
@@ -51,28 +50,16 @@ function rowToCsvLine(row: ReportRow): string {
   return fields.map(escapeCsvField).join(';')
 }
 
-async function getAdminUser() {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
-  if (error || !user) return null
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, role, active')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile?.active || profile.role !== 'admin') return null
-  return profile
-}
-
 export async function GET(request: Request) {
-  // Authorization: admin only — check directly without page-level redirect helpers
-  const admin = await getAdminUser()
-  if (!admin) {
+  // Authorization: admin only — requireAdmin throws Next.js redirect/notFound for auth failures.
+  // Re-throw those special errors so Next.js handles them; catch nothing else here.
+  try {
+    await requireAdmin()
+  } catch (err) {
+    // Always re-throw special Next.js navigation errors
+    if (isRedirectError(err)) throw err
+    // notFound() also throws a special error — check by digest
+    if (err instanceof Error && 'digest' in err) throw err
     return new Response('Acesso não autorizado.', { status: 403 })
   }
 

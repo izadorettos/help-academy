@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -30,8 +31,10 @@ export function AdminSidebar() {
       className="border-border bg-surface hidden w-60 shrink-0 flex-col border-r lg:flex"
       aria-label="Navegação admin"
     >
-      <div className="border-border flex h-14 items-center gap-1 border-b px-4">
-        <span className="text-brand font-bold">Help Academy</span>
+      <div className="border-border flex h-14 items-center gap-2 border-b px-4">
+        <Link href="/admin" className="flex items-center">
+          <Image src="/brand/logo-help-positivo.png" alt="Help Academy" height={28} width={112} priority />
+        </Link>
         <span className="text-text-subtle text-sm">Admin</span>
       </div>
 
@@ -43,7 +46,7 @@ export function AdminSidebar() {
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${active ? 'bg-brand-soft text-brand-hover' : 'text-text-muted hover:bg-surface-muted hover:text-text'}`}
+              className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${active ? 'bg-brand-soft text-brand-text' : 'text-text-muted hover:bg-surface-muted hover:text-text'}`}
             >
               <Icon className="size-5 shrink-0" aria-hidden />
               {label}

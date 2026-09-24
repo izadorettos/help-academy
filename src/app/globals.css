@@ -1,56 +1,86 @@
 @import 'tailwindcss';
 
 /*
- * Tokens do design system (docs/DESIGN-SYSTEM.md §2).
- * Valores de marca PROVISÓRIOS até a decisão D-01 (identidade visual oficial).
- * Componentes usam apenas os tokens semânticos (bg-surface, text-muted, …).
+ * Tokens do design system — Marca HELP (BRAND-HELP.md).
+ * Fonte: Branding Book v2.0 — Help Entregas (01/09/2026).
+ * Substitui os valores provisórios anteriores.
  */
 @theme {
-  /* cores semânticas */
-  --color-brand: #e4002b;
-  --color-brand-hover: #b80023;
-  --color-brand-soft: #fdecef;
-  --color-on-brand: #ffffff;
+  /* Marca */
+  --color-brand: #2BBDEF;
+  --color-brand-hover: #0E9BCB;
+  --color-brand-soft: #E6F6FC;
+  --color-brand-text: #1C7999;
+  --color-on-brand: #121417;
 
-  --color-bg: #f7f7f8;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f1f1f3;
-  --color-border: #e4e4e7;
+  /* Acento (coral) */
+  --color-accent: #FF6B4A;
+  --color-accent-strong: #E04A28;
+  --color-accent-soft: #FFEAE3;
 
-  --color-text: #18181b;
-  --color-text-muted: #52525b;
-  --color-text-subtle: #71717a;
+  /* Tinta e superfície */
+  --color-text: #121417;
+  --color-text-strong-muted: #2A2D33;
+  --color-text-muted: #55585F;
+  --color-text-subtle: #8C8F96;
+  --color-bg: #F4F8FD;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F4F8FD;
+  --color-border: #E6E3DC;
+  --color-ink: #121417;
+  --color-navy: #0A1730;
+  --color-on-dark: #FAF7F2;
+  --color-on-dark-muted: #A4A7AE;
 
-  --color-success: #15803d;
-  --color-success-soft: #dcfce7;
-  --color-warning: #b45309;
-  --color-warning-soft: #fef3c7;
-  --color-danger: #b91c1c;
-  --color-danger-soft: #fee2e2;
-  --color-xp: #7c3aed;
-  --color-xp-soft: #ede9fe;
-  --color-focus: #2563eb;
+  /* Status — jornada */
+  --color-status-info-fg-dark: #29B6F6;
+  --color-status-info-chip-bg: #E6F6FC;
+  --color-status-info-chip-fg: #17698A;
+  --color-status-warning-fg-dark: #FFD54F;
+  --color-status-warning-chip-bg: #FFF6DA;
+  --color-status-warning-chip-fg: #7A5B00;
+  --color-status-success-fg-dark: #34D399;
+  --color-status-success-chip-bg: #E3F7EF;
+  --color-status-success-chip-fg: #0F6E4C;
+  --color-status-danger-fg-dark: #F04030;
+  --color-status-danger-chip-bg: #FFEAE3;
+  --color-status-danger-chip-fg: #8A2B12;
 
-  /* tipografia — pilha do sistema até definirmos a fonte da marca (D-01) */
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Aliases semânticos (mantém compatibilidade com código existente) */
+  --color-success: #0F6E4C;
+  --color-success-soft: #E3F7EF;
+  --color-warning: #7A5B00;
+  --color-warning-soft: #FFF6DA;
+  --color-danger: #8A2B12;
+  --color-danger-soft: #FFEAE3;
+  --color-error: #8A2B12;
+  --color-xp: #FF6B4A;
+  --color-xp-soft: #FFEAE3;
+  --color-focus: #1C7999;
 
-  --text-display: 1.875rem;
-  --text-display--line-height: 2.25rem;
-  --text-h1: 1.5rem;
-  --text-h1--line-height: 2rem;
-  --text-h2: 1.25rem;
-  --text-h2--line-height: 1.75rem;
-  --text-h3: 1.0625rem;
-  --text-h3--line-height: 1.5rem;
+  /* Tipografia */
+  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
-  /* raio */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --text-display: 2.5rem;
+  --text-display--line-height: 3rem;
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 2.25rem;
+  --text-h2: 1.375rem;
+  --text-h2--line-height: 1.875rem;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.625rem;
 
-  /* sombra */
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 3px rgb(0 0 0 / 0.06);
+  /* Raio */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  /* Sombra */
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.04), 0 1px 4px rgb(0 0 0 / 0.06);
   --shadow-pop: 0 10px 30px rgb(0 0 0 / 0.12);
 }
 

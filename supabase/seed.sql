@@ -135,7 +135,7 @@ insert into public.learning_paths (
   '00000000-0000-0000-0002-000000000001',
   'Onboarding Geral — Conheça a Help',
   'onboarding-geral',
-  'Trilha de boas-vindas para todos os colaboradores da Help Entregas.',
+  'Trilha de boas-vindas para todas as pessoas que integram a Help Entregas.',
   '00000000-0000-0000-0001-000000000001',
   true, true, 'published', 1,
   '00000000-0000-0000-0000-000000000001'

@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, BookOpen, Award, User, Settings, LogOut } from 'lucide-react'
 import { Avatar } from '@/components/ui/avatar'
@@ -26,8 +27,8 @@ export function Sidebar({ user }: SidebarProps) {
       aria-label="Navegação principal"
     >
       <div className="border-border flex h-14 items-center border-b px-4">
-        <Link href="/dashboard" className="text-brand text-lg font-bold">
-          Help Academy
+        <Link href="/dashboard" className="flex items-center">
+          <Image src="/brand/logo-help-positivo.png" alt="Help Academy" height={28} width={112} priority />
         </Link>
       </div>
 
@@ -40,7 +41,7 @@ export function Sidebar({ user }: SidebarProps) {
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${active ? 'bg-brand-soft text-brand-hover' : 'text-text-muted hover:bg-surface-muted hover:text-text'}`}
+              className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${active ? 'bg-brand-soft text-brand-text' : 'text-text-muted hover:bg-surface-muted hover:text-text'}`}
             >
               <Icon className="size-5 shrink-0" aria-hidden />
               {label}

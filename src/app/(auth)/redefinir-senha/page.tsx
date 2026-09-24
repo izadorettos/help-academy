@@ -1,16 +1,13 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { getAuthProvider } from '@/lib/auth'
 import { ResetPasswordForm } from './reset-form'
 
 export const metadata: Metadata = { title: 'Nova senha' }
 
 export default async function ResetPasswordPage() {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const identity = await getAuthProvider().getIdentity()
+  if (!identity) redirect('/login')
 
   return (
     <div className="flex flex-col gap-6">

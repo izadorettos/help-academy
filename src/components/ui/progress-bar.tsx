@@ -35,7 +35,7 @@ export function ProgressBar({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={label}
-        className="h-2 w-full overflow-hidden rounded-full bg-surface-muted"
+        className="h-2 w-full overflow-hidden rounded-full bg-border"
       >
         <div
           className={`h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none ${BAR_CLASSES[variant]}`}

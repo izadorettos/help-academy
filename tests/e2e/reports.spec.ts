@@ -8,7 +8,7 @@ const MEMBER_PASSWORD = 'Membro@123'
 test.describe('relatórios — admin', () => {
   test('admin acessa /admin/relatorios e vê a página de relatórios', async ({ page }) => {
     await page.goto('/login')
-    await page.getByLabel('E-mail').fill(ADMIN_EMAIL)
+    await page.getByLabel('Login').fill(ADMIN_EMAIL)
     await page.getByLabel('Senha').fill(ADMIN_PASSWORD)
     await page.getByRole('button', { name: 'Entrar' }).click()
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 })
@@ -20,7 +20,7 @@ test.describe('relatórios — admin', () => {
 
   test('botão Exportar CSV está presente na página de relatórios', async ({ page }) => {
     await page.goto('/login')
-    await page.getByLabel('E-mail').fill(ADMIN_EMAIL)
+    await page.getByLabel('Login').fill(ADMIN_EMAIL)
     await page.getByLabel('Senha').fill(ADMIN_PASSWORD)
     await page.getByRole('button', { name: 'Entrar' }).click()
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 })
@@ -36,7 +36,7 @@ test.describe('relatórios — admin', () => {
   test('endpoint CSV retorna 200 e content-type text/csv para admin', async ({ page }) => {
     // First log in via page to get session cookies
     await page.goto('/login')
-    await page.getByLabel('E-mail').fill(ADMIN_EMAIL)
+    await page.getByLabel('Login').fill(ADMIN_EMAIL)
     await page.getByLabel('Senha').fill(ADMIN_PASSWORD)
     await page.getByRole('button', { name: 'Entrar' }).click()
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 })
@@ -50,7 +50,7 @@ test.describe('relatórios — admin', () => {
 
   test('endpoint CSV retorna 403 para membro autenticado', async ({ page }) => {
     await page.goto('/login')
-    await page.getByLabel('E-mail').fill(MEMBER_EMAIL)
+    await page.getByLabel('Login').fill(MEMBER_EMAIL)
     await page.getByLabel('Senha').fill(MEMBER_PASSWORD)
     await page.getByRole('button', { name: 'Entrar' }).click()
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 })

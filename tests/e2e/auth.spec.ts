@@ -8,7 +8,7 @@ const MEMBER_PASSWORD = 'Membro@123'
 test.describe('autenticação', () => {
   test('login válido redireciona para /dashboard', async ({ page }) => {
     await page.goto('/login')
-    await page.getByLabel('E-mail').fill(ADMIN_EMAIL)
+    await page.getByLabel('Login').fill(ADMIN_EMAIL)
     await page.getByLabel('Senha').fill(ADMIN_PASSWORD)
     await page.getByRole('button', { name: 'Entrar' }).click()
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 })
@@ -17,7 +17,7 @@ test.describe('autenticação', () => {
 
   test('login com credenciais inválidas mostra mensagem de erro', async ({ page }) => {
     await page.goto('/login')
-    await page.getByLabel('E-mail').fill(ADMIN_EMAIL)
+    await page.getByLabel('Login').fill(ADMIN_EMAIL)
     await page.getByLabel('Senha').fill('senha-errada-000')
     await page.getByRole('button', { name: 'Entrar' }).click()
     await expect(page.getByRole('alert')).toBeVisible({ timeout: 10_000 })
@@ -26,7 +26,7 @@ test.describe('autenticação', () => {
 
   test('logout redireciona para /login', async ({ page }) => {
     await page.goto('/login')
-    await page.getByLabel('E-mail').fill(ADMIN_EMAIL)
+    await page.getByLabel('Login').fill(ADMIN_EMAIL)
     await page.getByLabel('Senha').fill(ADMIN_PASSWORD)
     await page.getByRole('button', { name: 'Entrar' }).click()
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 })
@@ -47,7 +47,7 @@ test.describe('autenticação', () => {
 
   test('membro autenticado em /admin recebe 404', async ({ page }) => {
     await page.goto('/login')
-    await page.getByLabel('E-mail').fill(MEMBER_EMAIL)
+    await page.getByLabel('Login').fill(MEMBER_EMAIL)
     await page.getByLabel('Senha').fill(MEMBER_PASSWORD)
     await page.getByRole('button', { name: 'Entrar' }).click()
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 })

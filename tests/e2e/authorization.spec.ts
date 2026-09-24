@@ -33,7 +33,7 @@ const MEMBER_PAGES = [
 
 async function loginAsMember(page: Page) {
   await page.goto('/login')
-  await page.getByLabel('E-mail').fill(MEMBER_EMAIL)
+  await page.getByLabel('Login').fill(MEMBER_EMAIL)
   await page.getByLabel('Senha').fill(MEMBER_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 })
@@ -41,7 +41,7 @@ async function loginAsMember(page: Page) {
 
 async function loginAsAdmin(page: Page) {
   await page.goto('/login')
-  await page.getByLabel('E-mail').fill(ADMIN_EMAIL)
+  await page.getByLabel('Login').fill(ADMIN_EMAIL)
   await page.getByLabel('Senha').fill(ADMIN_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 })

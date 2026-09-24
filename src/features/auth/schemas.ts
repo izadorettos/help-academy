@@ -1,12 +1,12 @@
 import { z } from 'zod'
 
 export const signInSchema = z.object({
-  email: z.string().email('E-mail inválido.'),
+  login: z.string().min(1, 'Login obrigatório.'),
   password: z.string().min(1, 'Senha obrigatória.'),
 })
 
 export const requestPasswordResetSchema = z.object({
-  email: z.string().email('E-mail inválido.'),
+  login: z.string().min(1, 'Login obrigatório.'),
 })
 
 export const updatePasswordSchema = z
