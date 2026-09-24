@@ -28,6 +28,10 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 15 | Relatórios | P6 | 14 | ✅ |
 | 16 | Testes (endurecimento) | — | todas | ✅ |
 | 17 | Deploy | — | 16 | ⬜ |
+| 18 | Marca HELP via tokens (`BRAND-HELP.md`) | Demo Lucas | 16 | ⬜ |
+| 19 | Auth desacoplada (`AUTH-PROVIDER.md`) | Demo Lucas | 16 | ⬜ |
+| 20 | Novos formatos de atividade (`DEMO-TRILHA.md` §2–3) | Demo Lucas | 18 | ⬜ |
+| 21 | Trilha demo “Conhecendo a HELP” (`DEMO-TRILHA.md` §4–6) | Demo Lucas | 20 | ⬜ |
 
 \* O dashboard é construído na fase 7 com dados reais disponíveis (trilhas, progresso por view); os cards de XP/conquistas são ligados nas fases 12–13. Sem dados falsos: enquanto não existirem, os cards mostram estado vazio real.
 
@@ -370,3 +374,26 @@ pastas vazias: src/components/{ui,layout,learning,quiz,gamification,admin}, src/
 npm run lint && npm run typecheck && npm run test && npm run build && npm run test:e2e
 ```
 + CI verde no primeiro push. Resultado de cada comando reportado.
+
+
+---
+
+## 6. Etapa de demonstração para o Lucas (24/09/2026)
+
+Infraestrutura aprovada pelo Lucas. Antes do deploy (Fase 17), preparar uma demonstração completa da experiência do aluno. **Preservar tudo o que funciona; não refazer a arquitetura.**
+
+### FASE 18 — Marca HELP via tokens  ⬜
+Aplicar `docs/BRAND-HELP.md` em `globals.css` (tokens), fontes (Inter Tight, Instrument Serif, JetBrains Mono via `next/font/google`), logo (`public/brand/`) e ajustes mínimos em `components/ui` (pill, chips tonais, `brand-text`, variante `dark`). Remover emojis da interface. Revisar strings contra o vocabulário travado.
+**Concluída quando:** nenhuma cor/fonte fora dos tokens (grep por hex e classes de paleta crua em `src/`); axe sem violações sérias; teste de vocabulário verde; screenshots 390/1440 revisados; lint, typecheck, test, build, E2E verdes.
+
+### FASE 19 — Auth desacoplada  ⬜
+Implementar `docs/AUTH-PROVIDER.md` §2. Sem integrar a HELP (stub `help` lança `NotConfigured`).
+**Concluída quando:** nenhum `supabase.auth.*` fora de `lib/auth/providers/` (teste de varredura); login/logout/recuperação continuam passando nos E2E; telas condicionadas por `capabilities`; checagem de boot contra usuário de teste em produção.
+
+### FASE 20 — Novos formatos de atividade  ⬜
+Migrations 0015–0018, RPCs `save_lesson_progress`, `submit_activity`, `check_quiz_answer`, ajustes em `complete_lesson`/`get_lesson_for_member`, componentes `VideoPlayer` (provedores iframe + placeholder), `Callout` no Markdown, `TaskActivity`, `ChallengeActivity`, `SurveyActivity`, `GameActivity`, stepper e painel de recompensa. Admin: listar e editar campos básicos dos novos tipos sem quebrar (editor estruturado completo fica para depois).
+**Concluída quando:** pgTAP de cada critério, idempotência e RLS; unitários; lint, typecheck, test, build verdes.
+
+### FASE 21 — Trilha demo “Conhecendo a HELP”  ⬜
+`supabase/demo/*`, `scripts/demo.mjs`, `npm run demo:seed|demo:reset|demo:remove`, usuário `demo@help.local` (senha via `.env.local`), filtro `is_demo` em relatórios.
+**Concluída quando:** um E2E por formato (7, caminho feliz + erro) e `demo-journey.spec.ts` do começo ao fim em 390×844 e 1440×900; teste de remoção sem resíduos; axe; lint, typecheck, test, build verdes; relatório final com: formatos funcionando, como testar cada um, usuário demo, dependências da auth HELP e perguntas ao TI (`AUTH-PROVIDER.md` §3–4).
