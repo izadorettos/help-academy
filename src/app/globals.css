@@ -112,3 +112,49 @@
     }
   }
 }
+
+/*
+ * Callouts renderizados por src/lib/markdown.ts a partir de blocos
+ * `> [!NOTE|TIP|IMPORTANT|WARNING]`.
+ */
+@layer components {
+  .ha-callout {
+    border-radius: var(--radius-md);
+    padding: 0.875rem 1rem;
+    margin: 1rem 0;
+    border: 1px solid transparent;
+  }
+
+  .ha-callout__title {
+    display: block;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.01em;
+  }
+
+  .ha-callout--note {
+    background-color: var(--color-status-info-chip-bg);
+    color: var(--color-status-info-chip-fg);
+    border-color: color-mix(in oklab, var(--color-status-info-chip-fg) 15%, transparent);
+  }
+  .ha-callout--tip {
+    background-color: var(--color-status-success-chip-bg);
+    color: var(--color-status-success-chip-fg);
+    border-color: color-mix(in oklab, var(--color-status-success-chip-fg) 15%, transparent);
+  }
+  .ha-callout--important {
+    background-color: var(--color-status-warning-chip-bg);
+    color: var(--color-status-warning-chip-fg);
+    border-color: color-mix(in oklab, var(--color-status-warning-chip-fg) 20%, transparent);
+  }
+  .ha-callout--warning {
+    background-color: var(--color-status-danger-chip-bg);
+    color: var(--color-status-danger-chip-fg);
+    border-color: color-mix(in oklab, var(--color-status-danger-chip-fg) 20%, transparent);
+  }
+
+  .ha-callout p:last-child {
+    margin-bottom: 0;
+  }
+}

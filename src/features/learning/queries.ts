@@ -525,6 +525,16 @@ export interface LastQuizAttempt {
   completedAt: string
 }
 
+export interface LastActivitySubmission {
+  id: string
+  kind: 'task' | 'challenge' | 'survey' | 'game'
+  status: 'submitted' | 'in_review' | 'completed'
+  score: number | null
+  payload: Record<string, unknown>
+  feedback: Record<string, unknown> | null
+  createdAt: string
+}
+
 export interface LessonForMember {
   id: string
   title: string
@@ -536,6 +546,12 @@ export interface LessonForMember {
   estimatedMinutes: number | null
   required: boolean
   position: number
+  /** Configuração específica do tipo de atividade (task/challenge/survey/game/video). Sempre objeto. */
+  config: Record<string, unknown>
+  /** Progresso 0..100 do vídeo (ou 0 para outros tipos). */
+  progressPercent: number
+  /** Posição em segundos do último ponto assistido (vídeo). */
+  positionSeconds: number | null
   /** true when the lesson exists and is published but the sequential rule blocks access */
   locked: boolean
   /** true when lesson_progress.completed_at is not null */
@@ -561,6 +577,8 @@ export interface LessonForMember {
   quiz: QuizForLesson | null
   /** Most recent quiz attempt by this user — null if never attempted */
   lastAttempt: LastQuizAttempt | null
+  /** Última submissão de atividade (task/challenge/survey/game). Null se nunca enviou. */
+  lastSubmission: LastActivitySubmission | null
 }
 
 /**
@@ -585,7 +603,7 @@ export async function getLessonForMember(
     .from('lessons')
     .select(
       `id, title, description, content_type, content, external_url, file_path,
-       estimated_minutes, required, position, published,
+       estimated_minutes, required, position, published, config,
        modules!inner(
          id, title, position,
          learning_paths!inner(
@@ -618,9 +636,19 @@ export async function getLessonForMember(
   // 2. Fetch lesson progress for this user
   const { data: progressRow } = await supabase
     .from('lesson_progress')
-    .select('started_at, completed_at, last_accessed_at')
+    .select('started_at, completed_at, last_accessed_at, progress_percent, position_seconds')
     .eq('user_id', userId)
     .eq('lesson_id', lessonId)
+    .maybeSingle()
+
+  // 2b. Fetch the latest activity_submissions row for this user + lesson
+  const { data: submissionRow } = await supabase
+    .from('activity_submissions')
+    .select('id, kind, status, score, payload, feedback, created_at')
+    .eq('user_id', userId)
+    .eq('lesson_id', lessonId)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .maybeSingle()
 
   // 3. Determine if lesson is locked (only relevant for sequential paths)
@@ -801,6 +829,32 @@ export async function getLessonForMember(
     })
   }
 
+  const rawConfig = (lessonRow as { config?: unknown }).config
+  const config: Record<string, unknown> =
+    rawConfig && typeof rawConfig === 'object' && !Array.isArray(rawConfig)
+      ? (rawConfig as Record<string, unknown>)
+      : {}
+
+  const rawPayload = submissionRow?.payload
+  const rawFeedback = submissionRow?.feedback
+  const lastSubmission: LastActivitySubmission | null = submissionRow
+    ? {
+        id: String(submissionRow.id),
+        kind: submissionRow.kind as 'task' | 'challenge' | 'survey' | 'game',
+        status: submissionRow.status as 'submitted' | 'in_review' | 'completed',
+        score: submissionRow.score != null ? Number(submissionRow.score) : null,
+        payload:
+          rawPayload && typeof rawPayload === 'object' && !Array.isArray(rawPayload)
+            ? (rawPayload as Record<string, unknown>)
+            : {},
+        feedback:
+          rawFeedback && typeof rawFeedback === 'object' && !Array.isArray(rawFeedback)
+            ? (rawFeedback as Record<string, unknown>)
+            : null,
+        createdAt: String(submissionRow.created_at),
+      }
+    : null
+
   return {
     id: String(lessonRow.id),
     title: String(lessonRow.title),
@@ -812,6 +866,10 @@ export async function getLessonForMember(
     estimatedMinutes: lessonRow.estimated_minutes ?? null,
     required: Boolean(lessonRow.required),
     position: Number(lessonRow.position),
+    config,
+    progressPercent: Number(progressRow?.progress_percent ?? 0),
+    positionSeconds:
+      progressRow?.position_seconds != null ? Number(progressRow.position_seconds) : null,
     locked,
     completed: progressRow?.completed_at != null,
     completedAt: progressRow?.completed_at ?? null,
@@ -832,6 +890,7 @@ export async function getLessonForMember(
     nextLessonId,
     quiz: quizData,
     lastAttempt,
+    lastSubmission,
   }
 }
 

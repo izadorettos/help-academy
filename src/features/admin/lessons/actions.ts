@@ -7,6 +7,9 @@ import { requireAdmin } from '@/lib/auth/guards'
 import { ok, fail, type ActionResult } from '@/lib/action-result'
 import { lessonSchema, parseLessonFormData } from './schemas'
 import { getYouTubeEmbedUrl, isAllowedEmbed } from '@/lib/embed-allowlist'
+import type { Database } from '@/types/database.types'
+
+type Json = Database['public']['Tables']['lessons']['Insert']['config']
 
 // ─── Create ────────────────────────────────────────────────────────────────────
 
@@ -25,7 +28,7 @@ export async function createLesson(
       return fail('Dados inválidos.', fieldErrors)
     }
 
-    const { title, content_type, content, external_url, file_path, estimated_minutes, required } =
+    const { title, content_type, content, external_url, file_path, estimated_minutes, required, config } =
       parsed.data
 
     const supabase = await createServerClient()
@@ -54,6 +57,7 @@ export async function createLesson(
         required,
         published: false,
         position,
+        config: (config ?? {}) as Json,
       })
       .select('id')
       .single()
@@ -89,7 +93,7 @@ export async function updateLesson(
       return fail('Dados inválidos.', fieldErrors)
     }
 
-    const { title, content_type, content, external_url, file_path, estimated_minutes, required } =
+    const { title, content_type, content, external_url, file_path, estimated_minutes, required, config } =
       parsed.data
 
     const supabase = await createServerClient()
@@ -103,6 +107,7 @@ export async function updateLesson(
         file_path: file_path ?? null,
         estimated_minutes: estimated_minutes ?? null,
         required,
+        config: (config ?? {}) as Json,
       })
       .eq('id', id)
 

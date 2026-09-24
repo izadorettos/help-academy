@@ -11,6 +11,10 @@ import {
   ExternalLink,
   Code2,
   BookOpen,
+  CheckSquare,
+  Zap,
+  ListChecks,
+  Puzzle,
 } from 'lucide-react'
 import { requireUser } from '@/lib/auth/guards'
 import { getPathBySlug } from '@/features/learning/queries'
@@ -30,6 +34,10 @@ const CONTENT_TYPE_LABEL: Record<LessonType, string> = {
   pdf: 'PDF',
   link: 'Link',
   embed: 'Incorporado',
+  task: 'Tarefa',
+  challenge: 'Desafio',
+  survey: 'Questionário',
+  game: 'Game',
 }
 
 function ContentTypeIcon({ type }: { type: LessonType }) {
@@ -43,6 +51,14 @@ function ContentTypeIcon({ type }: { type: LessonType }) {
       return <ExternalLink className={cls} aria-hidden />
     case 'embed':
       return <Code2 className={cls} aria-hidden />
+    case 'task':
+      return <CheckSquare className={cls} aria-hidden />
+    case 'challenge':
+      return <Zap className={cls} aria-hidden />
+    case 'survey':
+      return <ListChecks className={cls} aria-hidden />
+    case 'game':
+      return <Puzzle className={cls} aria-hidden />
     default:
       return <FileText className={cls} aria-hidden />
   }

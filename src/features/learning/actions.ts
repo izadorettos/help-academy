@@ -4,6 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/auth/guards'
 import { z } from 'zod'
+import type { Database } from '@/types/database.types'
+
+type ActivityPayloadJson = Database['public']['Functions']['submit_activity']['Args']['p_payload']
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,6 +25,32 @@ export type QuizActionResult =
   | { ok: true; score: number; passed: boolean; correctCount: number; totalQuestions: number; passingScore: number; xpEarned: number; achievementsUnlocked: UnlockedAchievement[] }
   | { ok: false; error: string }
 
+export type SaveProgressResult =
+  | { ok: true; progressPercent: number; positionSeconds: number | null }
+  | { ok: false; error: string }
+
+export interface ActivityFeedback {
+  [key: string]: unknown
+}
+
+export type SubmitActivityResult =
+  | {
+      ok: true
+      status: 'submitted' | 'in_review' | 'completed'
+      score: number | null
+      feedback: ActivityFeedback | null
+      xpEarned: number
+      achievementsUnlocked: UnlockedAchievement[]
+      nextLessonId: string | null
+      submissionId: string
+      alreadySubmitted: boolean
+    }
+  | { ok: false; error: string }
+
+export type CheckAnswerResult =
+  | { ok: true; correct: boolean; explanation: string | null }
+  | { ok: false; error: string }
+
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 
 // UUID regex — accepts all 8-4-4-4-12 hex patterns (including non-standard versions
@@ -38,6 +67,23 @@ const answerSchema = z.object({
 const submitQuizSchema = z.object({
   quizId: uuidSchema,
   answers: z.array(answerSchema).min(1).max(100),
+})
+
+const saveProgressSchema = z.object({
+  lessonId: uuidSchema,
+  progressPercent: z.number().int().min(0).max(100),
+  positionSeconds: z.number().int().min(0).max(86_400).nullable().optional(),
+})
+
+const submitActivitySchema = z.object({
+  lessonId: uuidSchema,
+  payload: z.record(z.string(), z.unknown()),
+})
+
+const checkAnswerSchema = z.object({
+  lessonId: uuidSchema,
+  questionId: uuidSchema,
+  optionId: uuidSchema,
 })
 
 // ─── Actions ─────────────────────────────────────────────────────────────────
@@ -182,5 +228,184 @@ export async function submitQuiz(
   } catch (err) {
     console.error('[submitQuiz] unexpected error:', err)
     return { ok: false, error: 'Ocorreu um erro inesperado. Tente novamente.' }
+  }
+}
+
+/**
+ * Salva progresso de vídeo (0..100 %) e opcionalmente a posição em segundos.
+ * A RPC nunca reduz o progresso — usa greatest(existing, new) — e valida acesso.
+ */
+export async function saveLessonProgress(
+  lessonId: string,
+  progressPercent: number,
+  positionSeconds: number | null = null,
+): Promise<SaveProgressResult> {
+  try {
+    await requireUser()
+
+    const parsed = saveProgressSchema.safeParse({ lessonId, progressPercent, positionSeconds })
+    if (!parsed.success) {
+      return { ok: false, error: 'Dados de progresso inválidos.' }
+    }
+
+    const supabase = await createServerClient()
+
+    const { error } = await supabase.rpc('save_lesson_progress', {
+      p_lesson_id: parsed.data.lessonId,
+      p_percent: parsed.data.progressPercent,
+      p_position: parsed.data.positionSeconds ?? undefined,
+    })
+
+    if (error) {
+      const msg = error.message ?? ''
+      if (msg.includes('NO_ACCESS')) {
+        return { ok: false, error: 'Você não tem acesso a esta aula.' }
+      }
+      if (msg.includes('LESSON_LOCKED')) {
+        return { ok: false, error: 'Esta aula está bloqueada.' }
+      }
+      console.error('[saveLessonProgress] RPC error:', error.message)
+      return { ok: false, error: 'Não foi possível salvar o progresso.' }
+    }
+
+    return {
+      ok: true,
+      progressPercent: parsed.data.progressPercent,
+      positionSeconds: parsed.data.positionSeconds ?? null,
+    }
+  } catch (err) {
+    console.error('[saveLessonProgress] unexpected error:', err)
+    return { ok: false, error: 'Ocorreu um erro inesperado.' }
+  }
+}
+
+/**
+ * Envia uma atividade (task, challenge, survey, game) para avaliação server-side.
+ * A RPC valida payload pelo config da aula, aplica regras, conclui a aula quando adequado
+ * e distribui XP + conquistas.
+ */
+export async function submitActivity(
+  lessonId: string,
+  payload: Record<string, unknown>,
+): Promise<SubmitActivityResult> {
+  try {
+    await requireUser()
+
+    const parsed = submitActivitySchema.safeParse({ lessonId, payload })
+    if (!parsed.success) {
+      return { ok: false, error: 'Dados inválidos. Verifique sua resposta e tente novamente.' }
+    }
+
+    const supabase = await createServerClient()
+
+    const { data, error } = await supabase.rpc('submit_activity', {
+      p_lesson_id: parsed.data.lessonId,
+      p_payload: parsed.data.payload as ActivityPayloadJson,
+    })
+
+    if (error) {
+      const msg = error.message ?? ''
+      if (msg.includes('NO_ACCESS')) {
+        return { ok: false, error: 'Você não tem acesso a esta atividade.' }
+      }
+      if (msg.includes('LESSON_LOCKED')) {
+        return { ok: false, error: 'Esta atividade está bloqueada.' }
+      }
+      if (msg.includes('INVALID_PAYLOAD')) {
+        return { ok: false, error: 'Resposta incompleta. Preencha todos os campos obrigatórios.' }
+      }
+      if (msg.includes('INVALID_LESSON_TYPE')) {
+        return { ok: false, error: 'Esta aula não aceita este tipo de envio.' }
+      }
+      if (msg.includes('MISSING_ANSWER_KEY')) {
+        return { ok: false, error: 'Este game ainda não está configurado.' }
+      }
+      console.error('[submitActivity] RPC error:', error.message)
+      return { ok: false, error: 'Não foi possível enviar sua resposta.' }
+    }
+
+    const result = data as {
+      status?: string
+      score?: number | null
+      feedback?: ActivityFeedback | null
+      xp_awarded?: number
+      achievements_unlocked?: UnlockedAchievement[]
+      next_lesson_id?: string | null
+      submission_id?: string
+      already_submitted?: boolean
+    } | null
+
+    revalidatePath(`/aula/${lessonId}`)
+    revalidatePath('/dashboard')
+    revalidatePath('/trilhas')
+    revalidatePath('/perfil')
+    revalidatePath('/conquistas')
+
+    const status = (result?.status ?? 'submitted') as
+      | 'submitted'
+      | 'in_review'
+      | 'completed'
+
+    return {
+      ok: true,
+      status,
+      score: result?.score ?? null,
+      feedback: result?.feedback ?? null,
+      xpEarned: result?.xp_awarded ?? 0,
+      achievementsUnlocked: result?.achievements_unlocked ?? [],
+      nextLessonId: result?.next_lesson_id ?? null,
+      submissionId: String(result?.submission_id ?? ''),
+      alreadySubmitted: Boolean(result?.already_submitted),
+    }
+  } catch (err) {
+    console.error('[submitActivity] unexpected error:', err)
+    return { ok: false, error: 'Ocorreu um erro inesperado.' }
+  }
+}
+
+/**
+ * Verifica uma resposta de quiz individual (usado por quiz interativo).
+ * Retorna se está correta + explicação. Não grava tentativa.
+ */
+export async function checkQuizAnswer(
+  lessonId: string,
+  questionId: string,
+  optionId: string,
+): Promise<CheckAnswerResult> {
+  try {
+    await requireUser()
+
+    const parsed = checkAnswerSchema.safeParse({ lessonId, questionId, optionId })
+    if (!parsed.success) {
+      return { ok: false, error: 'Dados inválidos.' }
+    }
+
+    const supabase = await createServerClient()
+
+    const { data, error } = await supabase.rpc('check_quiz_answer', {
+      p_lesson_id: parsed.data.lessonId,
+      p_question_id: parsed.data.questionId,
+      p_option_id: parsed.data.optionId,
+    })
+
+    if (error) {
+      const msg = error.message ?? ''
+      if (msg.includes('NO_ACCESS')) {
+        return { ok: false, error: 'Você não tem acesso a esta questão.' }
+      }
+      console.error('[checkQuizAnswer] RPC error:', error.message)
+      return { ok: false, error: 'Não foi possível verificar a resposta.' }
+    }
+
+    const result = data as { correct?: boolean; explanation?: string | null } | null
+
+    return {
+      ok: true,
+      correct: Boolean(result?.correct),
+      explanation: result?.explanation ?? null,
+    }
+  } catch (err) {
+    console.error('[checkQuizAnswer] unexpected error:', err)
+    return { ok: false, error: 'Ocorreu um erro inesperado.' }
   }
 }

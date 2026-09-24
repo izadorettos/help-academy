@@ -7,13 +7,91 @@ import type { AdminLesson } from '@/features/admin/paths/queries'
 
 const CONTENT_TYPES = [
   { value: 'text', label: 'Texto (Markdown)' },
-  { value: 'video', label: 'Vídeo (URL)' },
+  { value: 'video', label: 'Vídeo (URL ou placeholder)' },
   { value: 'link', label: 'Link externo' },
   { value: 'embed', label: 'Embed (iframe)' },
   { value: 'pdf', label: 'PDF' },
+  { value: 'task', label: 'Tarefa (checklist)' },
+  { value: 'challenge', label: 'Desafio (resposta aberta)' },
+  { value: 'survey', label: 'Questionário' },
+  { value: 'game', label: 'Game (drag & sort / say-dont-say)' },
 ] as const
 
 type ContentType = (typeof CONTENT_TYPES)[number]['value']
+
+const ACTIVITY_TYPES: readonly ContentType[] = ['task', 'challenge', 'survey', 'game']
+
+const CONFIG_TEMPLATES: Record<ContentType, string> = {
+  text: '',
+  link: '',
+  embed: '',
+  pdf: '',
+  video: JSON.stringify(
+    {
+      provider: 'placeholder',
+      duration_seconds: 120,
+      chapters: [
+        { label: 'Introdução', seconds: 0 },
+        { label: 'Conclusão', seconds: 60 },
+      ],
+    },
+    null,
+    2,
+  ),
+  task: JSON.stringify(
+    {
+      intro: 'Complete os passos abaixo para concluir a tarefa.',
+      items: [
+        { id: 'p1', label: 'Primeiro passo', required: true },
+        { id: 'p2', label: 'Segundo passo', required: true },
+      ],
+      note_optional: true,
+      note_max_length: 500,
+    },
+    null,
+    2,
+  ),
+  challenge: JSON.stringify(
+    {
+      scenario: 'Descreva o cenário aqui.',
+      instructions: 'Explique como você resolveria a situação.',
+      min_length: 200,
+      max_length: 2000,
+      evaluation_criteria: [
+        { id: 'c1', label: 'Foco no cliente' },
+        { id: 'c2', label: 'Clareza de comunicação' },
+      ],
+      blocked_terms: [],
+      reference_answer: 'Resposta modelo aparece depois de concluir.',
+    },
+    null,
+    2,
+  ),
+  survey: JSON.stringify(
+    {
+      intro: 'Sua opinião é anônima.',
+      questions: [
+        { id: 'q1', question: 'De 1 a 5, como avalia o treinamento?', type: 'scale', required: true },
+        { id: 'q2', question: 'Deixe um comentário.', type: 'long_text', required: false, max_length: 500 },
+      ],
+    },
+    null,
+    2,
+  ),
+  game: JSON.stringify(
+    {
+      kind: 'drag_sort',
+      intro: 'Coloque os passos na ordem correta.',
+      items: [
+        { id: 'a', label: 'Primeiro' },
+        { id: 'b', label: 'Segundo' },
+        { id: 'c', label: 'Terceiro' },
+      ],
+    },
+    null,
+    2,
+  ),
+}
 
 interface Props {
   moduleId: string
@@ -25,8 +103,18 @@ interface Props {
 export function AddLessonForm({ moduleId, pathId, onSuccess, onCancel }: Props) {
   const [isPending, startTransition] = useTransition()
   const [contentType, setContentType] = useState<ContentType>('text')
+  const [configJson, setConfigJson] = useState<string>(CONFIG_TEMPLATES.text)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
+
+  function onContentTypeChange(next: ContentType) {
+    setContentType(next)
+    setConfigJson(CONFIG_TEMPLATES[next] ?? '')
+  }
+
+  const showConfig = contentType === 'video' || ACTIVITY_TYPES.includes(contentType)
+  const showUrlField = contentType === 'video' || contentType === 'link' || contentType === 'embed'
+  const urlRequired = contentType === 'link' || contentType === 'embed'
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -42,15 +130,17 @@ export function AddLessonForm({ moduleId, pathId, onSuccess, onCancel }: Props) 
         const title = formData.get('title') as string
         const estimatedRaw = formData.get('estimated_minutes') as string
         const required = formData.get('required') !== 'false'
+        const externalUrlValue = formData.get('external_url')
         const newLesson: AdminLesson = {
           id: result.data.id,
           moduleId,
           title,
           contentType,
           content: contentType === 'text' ? (formData.get('content') as string) : null,
-          externalUrl: ['video', 'link', 'embed'].includes(contentType)
-            ? (formData.get('external_url') as string)
-            : null,
+          externalUrl:
+            showUrlField && typeof externalUrlValue === 'string' && externalUrlValue.length > 0
+              ? externalUrlValue
+              : null,
           filePath: contentType === 'pdf' ? (formData.get('file_path') as string) : null,
           estimatedMinutes: estimatedRaw ? parseInt(estimatedRaw, 10) : null,
           required,
@@ -104,7 +194,7 @@ export function AddLessonForm({ moduleId, pathId, onSuccess, onCancel }: Props) 
           id="lesson-type"
           name="content_type"
           value={contentType}
-          onChange={(e) => setContentType(e.target.value as ContentType)}
+          onChange={(e) => onContentTypeChange(e.target.value as ContentType)}
           className="border-border bg-surface focus:border-brand focus:ring-brand w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-1"
         >
           {CONTENT_TYPES.map((t) => (
@@ -134,10 +224,16 @@ export function AddLessonForm({ moduleId, pathId, onSuccess, onCancel }: Props) 
         </div>
       )}
 
-      {['video', 'link', 'embed'].includes(contentType) && (
+      {showUrlField && (
         <div>
           <label htmlFor="lesson-url" className="mb-1 block text-xs font-medium">
-            URL <span aria-hidden className="text-danger">*</span>
+            URL
+            {urlRequired && <span aria-hidden className="text-danger"> *</span>}
+            {contentType === 'video' && (
+              <span className="ml-1 font-normal text-text-subtle">
+                (opcional se usar provider &quot;placeholder&quot; no config)
+              </span>
+            )}
           </label>
           <input
             id="lesson-url"
@@ -148,6 +244,31 @@ export function AddLessonForm({ moduleId, pathId, onSuccess, onCancel }: Props) 
           />
           {fieldError('external_url') && (
             <p className="text-danger mt-1 text-xs">{fieldError('external_url')}</p>
+          )}
+        </div>
+      )}
+
+      {showConfig && (
+        <div>
+          <label htmlFor="lesson-config" className="mb-1 block text-xs font-medium">
+            Configuração (JSON)
+            {ACTIVITY_TYPES.includes(contentType) && (
+              <span aria-hidden className="text-danger"> *</span>
+            )}
+          </label>
+          <textarea
+            id="lesson-config"
+            name="config_json"
+            rows={8}
+            value={configJson}
+            onChange={(e) => setConfigJson(e.target.value)}
+            className="border-border bg-surface focus:border-brand focus:ring-brand w-full rounded-md border px-3 py-2 font-mono text-xs outline-none focus:ring-1"
+          />
+          <p className="text-text-subtle mt-1 text-xs">
+            Modelo pré-preenchido para o tipo selecionado. Edite conforme necessário.
+          </p>
+          {fieldError('config_json') && (
+            <p className="text-danger mt-1 text-xs">{fieldError('config_json')}</p>
           )}
         </div>
       )}

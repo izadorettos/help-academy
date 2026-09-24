@@ -5,6 +5,10 @@ import {
   TrendingUp,
   Award,
   Trophy,
+  CheckSquare,
+  Zap,
+  Star,
+  MessageSquare,
 } from 'lucide-react'
 import type { LucideProps } from 'lucide-react'
 
@@ -13,12 +17,16 @@ import type { LucideProps } from 'lucide-react'
 // Maps achievement icon names (stored in DB) to Lucide components.
 // Add new entries here when new achievement icons are introduced.
 const ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
-  'book-open':   BookOpen,
-  'layers':      Layers,
-  'target':      Target,
-  'trending-up': TrendingUp,
-  'award':       Award,
-  'trophy':      Trophy,
+  'book-open':     BookOpen,
+  'layers':        Layers,
+  'target':        Target,
+  'trending-up':   TrendingUp,
+  'award':         Award,
+  'trophy':        Trophy,
+  'check-square':  CheckSquare,
+  'zap':           Zap,
+  'star':          Star,
+  'message-square': MessageSquare,
 }
 
 const DEFAULT_ICON = Trophy

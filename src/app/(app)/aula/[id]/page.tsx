@@ -11,13 +11,19 @@ import {
   FileType,
 } from 'lucide-react'
 import { requireUser } from '@/lib/auth/guards'
-import { getLessonForMember } from '@/features/learning/queries'
-import { isAllowedEmbed, getYouTubeEmbedUrl } from '@/lib/embed-allowlist'
+import { getLessonForMember, getPathBySlug } from '@/features/learning/queries'
+import { isAllowedEmbed } from '@/lib/embed-allowlist'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { renderMarkdown } from '@/lib/markdown'
 import { CompleteButton } from '@/components/learning/complete-button'
 import { QuizForm } from '@/components/quiz/quiz-form'
+import { VideoPlayer } from '@/components/learning/video-player'
+import { TaskActivity } from '@/components/learning/task-activity'
+import { ChallengeActivity } from '@/components/learning/challenge-activity'
+import { SurveyActivity } from '@/components/learning/survey-activity'
+import { GameActivity } from '@/components/learning/game-activity'
+import { ActivityStepper, type StepperItem } from '@/components/learning/activity-stepper'
 import type { LessonForMember } from '@/features/learning/queries'
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
@@ -71,41 +77,6 @@ function TextViewer({ content }: { content: string }) {
       // HTML sanitizado por renderMarkdown (sanitize-html)
       dangerouslySetInnerHTML={{ __html: html }}
     />
-  )
-}
-
-function VideoViewer({ externalUrl }: { externalUrl: string }) {
-  const embedUrl = getYouTubeEmbedUrl(externalUrl)
-
-  if (embedUrl) {
-    return (
-      <div className="aspect-video w-full overflow-hidden rounded-xl">
-        <iframe
-          src={embedUrl}
-          title="Vídeo da aula"
-          className="size-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-    )
-  }
-
-  // Fallback: direct video file
-  if (isAllowedEmbed(externalUrl)) {
-    return (
-      <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
-          <video src={externalUrl} controls className="size-full">
-          <track kind="captions" />
-        </video>
-      </div>
-    )
-  }
-
-  return (
-    <Card className="p-4 text-sm text-text-muted">
-      Não foi possível carregar o vídeo. URL fora do domínio permitido.
-    </Card>
   )
 }
 
@@ -200,10 +171,15 @@ function LessonViewer({ lesson }: { lesson: LessonForMember }) {
       )
 
     case 'video':
-      return lesson.externalUrl ? (
-        <VideoViewer externalUrl={lesson.externalUrl} />
-      ) : (
-        <p className="text-sm text-text-muted">URL do vídeo não disponível.</p>
+      return (
+        <VideoPlayer
+          lessonId={lesson.id}
+          externalUrl={lesson.externalUrl}
+          config={lesson.config}
+          initialProgressPercent={lesson.progressPercent}
+          initialPositionSeconds={lesson.positionSeconds}
+          completed={lesson.completed}
+        />
       )
 
     case 'link':
@@ -224,6 +200,13 @@ function LessonViewer({ lesson }: { lesson: LessonForMember }) {
       return (
         <PdfViewer signedPdfUrl={lesson.signedPdfUrl} filePath={lesson.filePath} />
       )
+
+    case 'task':
+    case 'challenge':
+    case 'survey':
+    case 'game':
+      // Rendered by dedicated activity components at page level.
+      return null
 
     default:
       return <p className="text-sm text-text-muted">Tipo de conteúdo não reconhecido.</p>
@@ -292,6 +275,23 @@ export default async function AulaPage({
     return <LockedLesson lesson={lesson} />
   }
 
+  // Fetch path for the stepper (module lessons list)
+  const path = await getPathBySlug(lesson.path.slug, user.id)
+  const currentModule = path?.modules.find((m) => m.id === lesson.module.id) ?? null
+  const stepperItems: StepperItem[] =
+    currentModule?.lessons.map((l) => ({
+      id: l.id,
+      title: l.title,
+      contentType: l.contentType,
+      state: l.state,
+    })) ?? []
+
+  const isActivity =
+    lesson.contentType === 'task' ||
+    lesson.contentType === 'challenge' ||
+    lesson.contentType === 'survey' ||
+    lesson.contentType === 'game'
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 space-y-6">
       {/* Breadcrumb */}
@@ -357,13 +357,63 @@ export default async function AulaPage({
         )}
       </header>
 
-      {/* Content */}
-      <Card className="p-6">
-        <LessonViewer lesson={lesson} />
-      </Card>
+      {/* Stepper — trilha visual do módulo */}
+      {stepperItems.length > 0 && (
+        <ActivityStepper items={stepperItems} currentLessonId={lesson.id} />
+      )}
 
-      {/* Quiz or complete button */}
-      {lesson.quiz ? (
+      {/* Content */}
+      {isActivity ? (
+        <>
+          {lesson.contentType === 'task' && (
+            <TaskActivity
+              lessonId={lesson.id}
+              pathSlug={lesson.path.slug}
+              nextLessonId={lesson.nextLessonId}
+              config={lesson.config}
+              lastSubmission={lesson.lastSubmission}
+              initiallyCompleted={lesson.completed}
+            />
+          )}
+          {lesson.contentType === 'challenge' && (
+            <ChallengeActivity
+              lessonId={lesson.id}
+              pathSlug={lesson.path.slug}
+              nextLessonId={lesson.nextLessonId}
+              config={lesson.config}
+              lastSubmission={lesson.lastSubmission}
+              initiallyCompleted={lesson.completed}
+            />
+          )}
+          {lesson.contentType === 'survey' && (
+            <SurveyActivity
+              lessonId={lesson.id}
+              pathSlug={lesson.path.slug}
+              nextLessonId={lesson.nextLessonId}
+              config={lesson.config}
+              lastSubmission={lesson.lastSubmission}
+              initiallyCompleted={lesson.completed}
+            />
+          )}
+          {lesson.contentType === 'game' && (
+            <GameActivity
+              lessonId={lesson.id}
+              pathSlug={lesson.path.slug}
+              nextLessonId={lesson.nextLessonId}
+              config={lesson.config}
+              lastSubmission={lesson.lastSubmission}
+              initiallyCompleted={lesson.completed}
+            />
+          )}
+        </>
+      ) : (
+        <Card className="p-6">
+          <LessonViewer lesson={lesson} />
+        </Card>
+      )}
+
+      {/* Quiz or complete button — não aparece para tipos de atividade novos */}
+      {!isActivity && lesson.quiz ? (
         <section aria-label="Quiz da aula">
           <QuizForm
             quiz={lesson.quiz}
@@ -381,11 +431,11 @@ export default async function AulaPage({
             }
           />
         </section>
-      ) : (
+      ) : !isActivity ? (
         <div className="flex justify-end border-t border-border pt-4">
           <CompleteButton lessonId={lesson.id} isCompleted={lesson.completed} />
         </div>
-      )}
+      ) : null}
 
       {/* Prev/Next navigation */}
       <LessonNav prevLessonId={lesson.prevLessonId} nextLessonId={lesson.nextLessonId} />

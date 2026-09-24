@@ -64,11 +64,63 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_submissions: {
+        Row: {
+          created_at: string
+          feedback: Json | null
+          id: string
+          kind: Database["public"]["Enums"]["lesson_type"]
+          lesson_id: string
+          payload: Json
+          score: number | null
+          status: Database["public"]["Enums"]["submission_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: Json | null
+          id?: string
+          kind: Database["public"]["Enums"]["lesson_type"]
+          lesson_id: string
+          payload: Json
+          score?: number | null
+          status: Database["public"]["Enums"]["submission_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: Json | null
+          id?: string
+          kind?: Database["public"]["Enums"]["lesson_type"]
+          lesson_id?: string
+          payload?: Json
+          score?: number | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_submissions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           active: boolean
           created_at: string
           id: string
+          is_demo: boolean
           name: string
           slug: string
           updated_at: string
@@ -77,6 +129,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           id?: string
+          is_demo?: boolean
           name: string
           slug: string
           updated_at?: string
@@ -85,6 +138,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           id?: string
+          is_demo?: boolean
           name?: string
           slug?: string
           updated_at?: string
@@ -152,6 +206,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          is_demo: boolean
           owner_department_id: string | null
           position: number
           published_at: string | null
@@ -168,6 +223,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_demo?: boolean
           owner_department_id?: string | null
           position?: number
           published_at?: string | null
@@ -184,6 +240,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_demo?: boolean
           owner_department_id?: string | null
           position?: number
           published_at?: string | null
@@ -211,12 +268,37 @@ export type Database = {
           },
         ]
       }
+      lesson_answer_keys: {
+        Row: {
+          key: Json
+          lesson_id: string
+        }
+        Insert: {
+          key: Json
+          lesson_id: string
+        }
+        Update: {
+          key?: Json
+          lesson_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_answer_keys_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: true
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed_at: string | null
           id: string
           last_accessed_at: string
           lesson_id: string
+          position_seconds: number | null
+          progress_percent: number
           started_at: string
           user_id: string
         }
@@ -225,6 +307,8 @@ export type Database = {
           id?: string
           last_accessed_at?: string
           lesson_id: string
+          position_seconds?: number | null
+          progress_percent?: number
           started_at?: string
           user_id: string
         }
@@ -233,6 +317,8 @@ export type Database = {
           id?: string
           last_accessed_at?: string
           lesson_id?: string
+          position_seconds?: number | null
+          progress_percent?: number
           started_at?: string
           user_id?: string
         }
@@ -255,6 +341,7 @@ export type Database = {
       }
       lessons: {
         Row: {
+          config: Json
           content: string | null
           content_type: Database["public"]["Enums"]["lesson_type"]
           created_at: string
@@ -272,6 +359,7 @@ export type Database = {
           xp_reward: number | null
         }
         Insert: {
+          config?: Json
           content?: string | null
           content_type: Database["public"]["Enums"]["lesson_type"]
           created_at?: string
@@ -289,6 +377,7 @@ export type Database = {
           xp_reward?: number | null
         }
         Update: {
+          config?: Json
           content?: string | null
           content_type?: Database["public"]["Enums"]["lesson_type"]
           created_at?: string
@@ -407,12 +496,15 @@ export type Database = {
       profiles: {
         Row: {
           active: boolean
+          auth_provider: string
           avatar_url: string | null
           created_at: string
           department_id: string | null
           email: string
+          external_subject: string | null
           hire_date: string | null
           id: string
+          is_demo: boolean
           job_title: string | null
           last_seen_at: string | null
           name: string
@@ -421,12 +513,15 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          auth_provider?: string
           avatar_url?: string | null
           created_at?: string
           department_id?: string | null
           email: string
+          external_subject?: string | null
           hire_date?: string | null
           id: string
+          is_demo?: boolean
           job_title?: string | null
           last_seen_at?: string | null
           name: string
@@ -435,12 +530,15 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          auth_provider?: string
           avatar_url?: string | null
           created_at?: string
           department_id?: string | null
           email?: string
+          external_subject?: string | null
           hire_date?: string | null
           id?: string
+          is_demo?: boolean
           job_title?: string | null
           last_seen_at?: string | null
           name?: string
@@ -816,7 +914,18 @@ export type Database = {
     Functions: {
       _complete_lesson_internal: {
         Args: { p_lesson_id: string; p_user_id: string }
-        Returns: undefined
+        Returns: Json
+      }
+      _unaccent_lower: { Args: { p_text: string }; Returns: string }
+      award_xp: {
+        Args: {
+          p_amount: number
+          p_reason: Database["public"]["Enums"]["xp_reason"]
+          p_ref_id: string
+          p_ref_type: string
+          p_user: string
+        }
+        Returns: number
       }
       can_access_lesson: {
         Args: { p_lesson: string; p_user?: string }
@@ -826,7 +935,16 @@ export type Database = {
         Args: { p_path: string; p_user?: string }
         Returns: boolean
       }
+      check_quiz_answer: {
+        Args: {
+          p_lesson_id: string
+          p_option_id: string
+          p_question_id: string
+        }
+        Returns: Json
+      }
       complete_lesson: { Args: { p_lesson_id: string }; Returns: Json }
+      evaluate_achievements: { Args: { p_user_id: string }; Returns: undefined }
       get_setting: { Args: { p_key: string }; Returns: number }
       is_active_user: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
@@ -842,7 +960,15 @@ export type Database = {
           next_min_xp: number
         }[]
       }
+      save_lesson_progress: {
+        Args: { p_lesson_id: string; p_percent: number; p_position?: number }
+        Returns: undefined
+      }
       start_lesson: { Args: { p_lesson_id: string }; Returns: undefined }
+      submit_activity: {
+        Args: { p_lesson_id: string; p_payload: Json }
+        Returns: Json
+      }
       submit_quiz: {
         Args: { p_answers: Json; p_quiz_id: string }
         Returns: Json
@@ -850,9 +976,23 @@ export type Database = {
       user_total_xp: { Args: { p_user: string }; Returns: number }
     }
     Enums: {
-      lesson_type: "text" | "video" | "pdf" | "link" | "embed"
+      lesson_type:
+        | "text"
+        | "video"
+        | "pdf"
+        | "link"
+        | "embed"
+        | "task"
+        | "challenge"
+        | "survey"
+        | "game"
       path_status: "draft" | "published" | "archived"
       question_type: "multiple_choice" | "true_false"
+      submission_status:
+        | "submitted"
+        | "completed"
+        | "needs_review"
+        | "changes_requested"
       user_role: "member" | "admin"
       xp_reason:
         | "lesson_completed"
@@ -860,6 +1000,7 @@ export type Database = {
         | "quiz_perfect"
         | "module_completed"
         | "path_completed"
+        | "game_perfect"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -990,9 +1131,25 @@ export const Constants = {
   },
   public: {
     Enums: {
-      lesson_type: ["text", "video", "pdf", "link", "embed"],
+      lesson_type: [
+        "text",
+        "video",
+        "pdf",
+        "link",
+        "embed",
+        "task",
+        "challenge",
+        "survey",
+        "game",
+      ],
       path_status: ["draft", "published", "archived"],
       question_type: ["multiple_choice", "true_false"],
+      submission_status: [
+        "submitted",
+        "completed",
+        "needs_review",
+        "changes_requested",
+      ],
       user_role: ["member", "admin"],
       xp_reason: [
         "lesson_completed",
@@ -1000,6 +1157,7 @@ export const Constants = {
         "quiz_perfect",
         "module_completed",
         "path_completed",
+        "game_perfect",
       ],
     },
   },

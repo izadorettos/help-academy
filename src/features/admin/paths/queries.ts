@@ -23,7 +23,7 @@ export interface AdminLesson {
   id: string
   moduleId: string
   title: string
-  contentType: 'text' | 'video' | 'pdf' | 'link' | 'embed'
+  contentType: 'text' | 'video' | 'pdf' | 'link' | 'embed' | 'task' | 'challenge' | 'survey' | 'game'
   content: string | null
   externalUrl: string | null
   filePath: string | null

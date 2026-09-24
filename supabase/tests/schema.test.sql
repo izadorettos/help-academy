@@ -74,14 +74,14 @@ select is(
 
 select is(
   (select count(*)::integer from public.gamification_settings),
-  5,
-  'seed: 5 configurações de gamificação'
+  6,
+  'seed: 6 configurações de gamificação'
 );
 
 select is(
   (select count(*)::integer from public.achievements),
-  5,
-  'seed: 5 conquistas inseridas'
+  9,
+  'seed: 9 conquistas inseridas'
 );
 
 -- ===========================================================================

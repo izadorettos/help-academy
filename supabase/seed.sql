@@ -183,14 +183,14 @@ insert into public.lessons (
     null, null,
     5, true, true, 1
   ),
-  -- Vídeo externo
+  -- Texto (2ª aula obrigatória)
   (
     '00000000-0000-0000-0004-000000000002',
     '00000000-0000-0000-0003-000000000001',
-    'Apresentação em vídeo',
-    'video',
+    'Ferramentas do dia a dia',
+    'text',
+    E'# Ferramentas\n\nAs principais ferramentas usadas na operação.',
     null,
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     null,
     3, true, true, 2
   ),
