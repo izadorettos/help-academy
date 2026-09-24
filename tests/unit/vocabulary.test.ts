@@ -42,7 +42,17 @@ function collectFiles(dir: string, exts: string[]): string[] {
 }
 
 function stripAllowBlocks(content: string): string {
-  return content.replace(/<!--\s*vocab-allow\s*-->[\s\S]*?<!--\s*\/vocab-allow\s*-->/g, '')
+  // HTML-style allow blocks (Markdown, JSX comments)
+  const noHtml = content.replace(
+    /<!--\s*vocab-allow\s*-->[\s\S]*?<!--\s*\/vocab-allow\s*-->/g,
+    '',
+  )
+  // SQL/JS-style allow blocks — for .sql files (and any /* … */ context).
+  // Matches /* vocab-allow */ … /* /vocab-allow */
+  return noHtml.replace(
+    /\/\*\s*vocab-allow\s*\*\/[\s\S]*?\/\*\s*\/vocab-allow\s*\*\//g,
+    '',
+  )
 }
 
 describe('vocabulary — palavras travadas', () => {
@@ -51,6 +61,7 @@ describe('vocabulary — palavras travadas', () => {
     (f) => !f.includes('.next') && !f.includes('vocabulary.test'),
   )
   const seedFile = join(root, 'supabase/seed.sql')
+  const demoDir = join(root, 'supabase/demo')
 
   const allFiles = [...srcFiles]
   try {
@@ -58,6 +69,16 @@ describe('vocabulary — palavras travadas', () => {
     allFiles.push(seedFile)
   } catch {
     // seed.sql may not exist in CI before db setup
+  }
+
+  // Include demo SQL files if present. Demo content ensina sobre palavras
+  // travadas; blocos intencionais são marcados com /* vocab-allow */.
+  try {
+    for (const f of collectFiles(demoDir, ['.sql'])) {
+      allFiles.push(f)
+    }
+  } catch {
+    // demo dir may not exist yet
   }
 
   for (const file of allFiles) {

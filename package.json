@@ -16,7 +16,10 @@
     "test:e2e": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:types": "npx supabase gen types typescript --local > src/types/database.types.ts"
+    "db:types": "npx supabase gen types typescript --local > src/types/database.types.ts",
+    "demo:seed": "node scripts/demo.mjs seed",
+    "demo:reset": "node scripts/demo.mjs reset",
+    "demo:remove": "node scripts/demo.mjs remove"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
