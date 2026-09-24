@@ -80,7 +80,10 @@ export function GameActivity({
     setPending(true)
     setResult(null)
     try {
-      const res = await submitActivity(lessonId, payload)
+      // RPC submit_activity espera { rounds: [{id, type, order|cards}] }.
+      // O componente atual roda uma rodada por lesson (id 'r1' por convenção).
+      const wrapped = wrapForRpc(kind, payload)
+      const res = await submitActivity(lessonId, wrapped)
       setResult(res)
       if (res.ok) {
         setRewardXp(res.xpEarned)
@@ -384,4 +387,24 @@ function hashCode(s: string): number {
     h = ((h << 5) - h + s.charCodeAt(i)) | 0
   }
   return h
+}
+
+/**
+ * Adapta o payload do componente ({order} ou {answers}) para o formato
+ * esperado pela RPC submit_activity ({rounds: [{id, type, order|cards}]}).
+ * Uma rodada por lesson, id fixo 'r1' (bater com o gabarito no seed).
+ */
+function wrapForRpc(kind: GameKind, payload: Record<string, unknown>): Record<string, unknown> {
+  if (kind === 'drag_sort') {
+    const order = Array.isArray(payload.order) ? payload.order : []
+    return {
+      rounds: [{ id: 'r1', type: 'drag_sort', order }],
+    }
+  }
+  // say_dont_say — vira array de {id, answer}
+  const answers = (payload.answers ?? {}) as Record<string, 'say' | 'dont_say'>
+  const cards = Object.entries(answers).map(([id, answer]) => ({ id, answer }))
+  return {
+    rounds: [{ id: 'r1', type: 'say_dont_say', cards }],
+  }
 }

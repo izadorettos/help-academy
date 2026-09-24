@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import Image from 'next/image'
+import { BrandLogo } from '@/components/brand/brand-logo'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -31,11 +31,11 @@ export function AdminSidebar() {
       className="border-border bg-surface hidden w-60 shrink-0 flex-col border-r lg:flex"
       aria-label="Navegação admin"
     >
-      <div className="border-border flex h-14 items-center gap-2 border-b px-4">
-        <Link href="/admin" className="flex items-center">
-          <Image src="/brand/logo-help-positivo.png" alt="Help Academy" height={28} width={112} priority />
+      <div className="border-border flex h-20 items-center gap-2 border-b px-4">
+        <Link href="/admin" className="flex items-center gap-3" aria-label="Painel admin — início">
+          <BrandLogo height={44} priority />
+          <span className="font-mono text-text-muted text-xs font-medium tracking-[0.08em] uppercase">Admin</span>
         </Link>
-        <span className="text-text-subtle text-sm">Admin</span>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 p-3">
