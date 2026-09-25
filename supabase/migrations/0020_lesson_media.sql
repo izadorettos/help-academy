@@ -73,7 +73,8 @@ create policy "lesson_media_admin_delete"
   );
 
 -- Member SELECT: path format is lessons/{lesson_id}/filename
--- (storage.foldername(name))[1] returns first folder segment → lesson_id
+-- (storage.foldername(name))[2] returns the second segment (lesson_id) for path "lessons/{id}/file"
+-- Cast to uuid required — invalid UUIDs (e.g. admin browse) return false via exception handler
 create policy "lesson_media_member_select"
   on storage.objects
   for select
@@ -82,6 +83,9 @@ create policy "lesson_media_member_select"
     bucket_id = 'lesson-media'
     and (
       public.is_admin()
-      or public.can_access_lesson((storage.foldername(name))[2])
+      or (
+        (storage.foldername(name))[2] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        and public.can_access_lesson(((storage.foldername(name))[2])::uuid)
+      )
     )
   );
