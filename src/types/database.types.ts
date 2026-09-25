@@ -457,6 +457,7 @@ export type Database = {
       }
       modules: {
         Row: {
+          cover_path: string | null
           created_at: string
           description: string | null
           id: string
@@ -466,6 +467,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cover_path?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -475,6 +477,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cover_path?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -986,6 +989,8 @@ export type Database = {
         | "challenge"
         | "survey"
         | "game"
+        | "image"
+        | "presentation"
       path_status: "draft" | "published" | "archived"
       question_type: "multiple_choice" | "true_false"
       submission_status:
