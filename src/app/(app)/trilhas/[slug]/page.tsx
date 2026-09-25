@@ -38,6 +38,8 @@ const CONTENT_TYPE_LABEL: Record<LessonType, string> = {
   challenge: 'Desafio',
   survey: 'Questionário',
   game: 'Game',
+  image: 'Imagem',
+  presentation: 'Apresentação',
 }
 
 function ContentTypeIcon({ type }: { type: LessonType }) {

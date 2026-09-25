@@ -19,6 +19,8 @@ import { renderMarkdown } from '@/lib/markdown'
 import { CompleteButton } from '@/components/learning/complete-button'
 import { QuizForm } from '@/components/quiz/quiz-form'
 import { VideoPlayer } from '@/components/learning/video-player'
+import { ImageLesson } from '@/components/learning/image-lesson'
+import { PresentationLesson } from '@/components/learning/presentation-lesson'
 import { TaskActivity } from '@/components/learning/task-activity'
 import { ChallengeActivity } from '@/components/learning/challenge-activity'
 import { SurveyActivity } from '@/components/learning/survey-activity'
@@ -170,18 +172,6 @@ function LessonViewer({ lesson }: { lesson: LessonForMember }) {
         <p className="text-sm text-text-muted">Conteúdo não disponível.</p>
       )
 
-    case 'video':
-      return (
-        <VideoPlayer
-          lessonId={lesson.id}
-          externalUrl={lesson.externalUrl}
-          config={lesson.config}
-          initialProgressPercent={lesson.progressPercent}
-          initialPositionSeconds={lesson.positionSeconds}
-          completed={lesson.completed}
-        />
-      )
-
     case 'link':
       return lesson.externalUrl ? (
         <LinkViewer externalUrl={lesson.externalUrl} title={lesson.title} />
@@ -199,6 +189,59 @@ function LessonViewer({ lesson }: { lesson: LessonForMember }) {
     case 'pdf':
       return (
         <PdfViewer signedPdfUrl={lesson.signedPdfUrl} filePath={lesson.filePath} />
+      )
+
+    case 'image': {
+      // Config may have images array, or fall back to single file
+      const rawImages = lesson.config['images']
+      const images: Array<{ url: string; alt: string; caption?: string }> = Array.isArray(rawImages)
+        ? rawImages
+            .filter(
+              (img): img is { url: string; alt: string; caption?: string } =>
+                typeof img === 'object' && img !== null && typeof (img as Record<string, unknown>)['url'] === 'string',
+            )
+            .map((img) => ({
+              url: img.url,
+              alt: typeof img.alt === 'string' ? img.alt : '',
+              caption: typeof img.caption === 'string' ? img.caption : undefined,
+            }))
+        : lesson.signedPdfUrl
+          ? [{ url: lesson.signedPdfUrl, alt: lesson.title, caption: lesson.description ?? undefined }]
+          : []
+
+      return <ImageLesson images={images} />
+    }
+
+    case 'presentation':
+      return (
+        <PresentationLesson
+          signedUrl={lesson.signedPdfUrl}
+          filePath={lesson.filePath}
+          title={lesson.title}
+        />
+      )
+
+    case 'video':
+      // File-based video (lesson-media) — already handled above with signedPdfUrl
+      if (!lesson.externalUrl && lesson.signedPdfUrl) {
+        return (
+          <div className="aspect-video w-full overflow-hidden rounded-xl bg-navy">
+            <video src={lesson.signedPdfUrl} controls className="size-full">
+              <track kind="captions" />
+            </video>
+          </div>
+        )
+      }
+      // YouTube/Vimeo handled by VideoPlayer
+      return (
+        <VideoPlayer
+          lessonId={lesson.id}
+          externalUrl={lesson.externalUrl}
+          config={lesson.config}
+          initialProgressPercent={lesson.progressPercent}
+          initialPositionSeconds={lesson.positionSeconds}
+          completed={lesson.completed}
+        />
       )
 
     case 'task':

@@ -11,6 +11,8 @@ import {
   Puzzle,
   Lock,
   Check,
+  Image as ImageIcon,
+  Presentation,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Database } from '@/types/database.types'
@@ -39,6 +41,8 @@ const ICON_BY_TYPE: Record<LessonType, LucideIcon> = {
   challenge: Zap,
   survey: ListChecks,
   game: Puzzle,
+  image: ImageIcon,
+  presentation: Presentation,
 }
 
 /**
