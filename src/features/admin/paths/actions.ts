@@ -2,9 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth/guards'
 import { ok, fail, type ActionResult } from '@/lib/action-result'
 import { pathSchema, parsePathFormData, generateSlug } from './schemas'
+import { randomUUID } from 'crypto'
 
 // ─── Create ────────────────────────────────────────────────────────────────────
 
@@ -514,3 +516,109 @@ export async function reorderModules(
     return fail()
   }
 }
+
+// ─── Trail cover upload ────────────────────────────────────────────────────────
+
+const COVER_IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp']
+const COVER_MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
+const TRAIL_COVER_SIZE_LIMIT = 5 * 1024 * 1024 // 5 MB
+
+export async function requestTrailCoverUpload(
+  pathId: string,
+  fileName: string,
+  fileSize: number,
+  mimeType: string,
+): Promise<ActionResult<{ signedUrl: string; token: string; path: string }>> {
+  try {
+    await requireAdmin()
+
+    if (!pathId) return fail('pathId é obrigatório.')
+    if (!COVER_IMAGE_MIMES.includes(mimeType)) {
+      return fail('Apenas imagens (jpg, png, webp) são permitidas para capa da trilha.')
+    }
+    if (fileSize > TRAIL_COVER_SIZE_LIMIT) {
+      return fail('A capa da trilha deve ter no máximo 5 MB.')
+    }
+
+    const ext = COVER_MIME_TO_EXT[mimeType] ?? 'jpg'
+    const uuid = randomUUID()
+    const path = `paths/${pathId}/${uuid}.${ext}`
+
+    const adminClient = createAdminClient()
+    const { data, error } = await adminClient.storage
+      .from('covers')
+      .createSignedUploadUrl(path)
+
+    if (error || !data) {
+      console.error('[requestTrailCoverUpload] signed URL error:', error?.message)
+      return fail('Não foi possível gerar URL de upload. Tente novamente.')
+    }
+
+    return ok({ signedUrl: data.signedUrl, token: data.token, path })
+  } catch (err) {
+    console.error('[requestTrailCoverUpload] unexpected error:', err)
+    return fail()
+  }
+}
+
+export async function updateTrailCoverUrl(
+  pathId: string,
+  coverUrl: string | null,
+): Promise<ActionResult> {
+  try {
+    await requireAdmin()
+
+    if (!pathId) return fail('pathId é obrigatório.')
+
+    const supabase = await createServerClient()
+    const { error } = await supabase
+      .from('learning_paths')
+      .update({ cover_url: coverUrl })
+      .eq('id', pathId)
+
+    if (error) {
+      console.error('[updateTrailCoverUrl] DB error:', error.message)
+      return fail()
+    }
+
+    revalidatePath('/admin/trilhas')
+    revalidatePath(`/admin/trilhas/${pathId}`)
+    revalidatePath(`/admin/trilhas/${pathId}/editar`)
+    return ok()
+  } catch (err) {
+    console.error('[updateTrailCoverUrl] unexpected error:', err)
+    return fail()
+  }
+}
+
+// ─── Get modules for path (server action for client wizard) ─────────────────────
+
+export async function getModulesForPath(
+  pathId: string,
+): Promise<ActionResult<Array<{ id: string; title: string; position: number }>>> {
+  try {
+    await requireAdmin()
+
+    const supabase = await createServerClient()
+    const { data, error } = await supabase
+      .from('modules')
+      .select('id, title, position')
+      .eq('learning_path_id', pathId)
+      .order('position', { ascending: true })
+
+    if (error) {
+      console.error('[getModulesForPath] DB error:', error.message)
+      return fail()
+    }
+
+    return ok((data ?? []).map((m) => ({ id: m.id, title: m.title, position: m.position })))
+  } catch (err) {
+    console.error('[getModulesForPath] unexpected error:', err)
+    return fail()
+  }
+}
+

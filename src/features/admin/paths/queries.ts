@@ -23,7 +23,7 @@ export interface AdminLesson {
   id: string
   moduleId: string
   title: string
-  contentType: 'text' | 'video' | 'pdf' | 'link' | 'embed' | 'task' | 'challenge' | 'survey' | 'game'
+  contentType: 'text' | 'video' | 'pdf' | 'link' | 'embed' | 'task' | 'challenge' | 'survey' | 'game' | 'image' | 'presentation'
   content: string | null
   externalUrl: string | null
   filePath: string | null
@@ -65,6 +65,27 @@ export interface AdminPathDetail {
 
 export interface AdminPathFilters {
   status?: 'draft' | 'published' | 'archived'
+}
+
+export interface AdminModuleSummary {
+  id: string
+  title: string
+  position: number
+}
+
+/**
+ * Returns all modules for a learning path, ordered by position. Admin-only.
+ */
+export async function adminGetModulesForPath(pathId: string): Promise<AdminModuleSummary[]> {
+  const supabase = await createServerClient()
+  const { data, error } = await supabase
+    .from('modules')
+    .select('id, title, position')
+    .eq('learning_path_id', pathId)
+    .order('position', { ascending: true })
+
+  if (error || !data) return []
+  return data.map((m) => ({ id: m.id, title: m.title, position: m.position }))
 }
 
 /**

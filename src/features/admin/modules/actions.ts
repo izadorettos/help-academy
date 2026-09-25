@@ -2,9 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth/guards'
 import { ok, fail, type ActionResult } from '@/lib/action-result'
 import { moduleSchema, parseModuleFormData } from './schemas'
+import { randomUUID } from 'crypto'
 
 // ─── Create ────────────────────────────────────────────────────────────────────
 
@@ -183,6 +185,83 @@ export async function reorderLessons(
     return ok()
   } catch (err) {
     console.error('[reorderLessons] unexpected error:', err)
+    return fail()
+  }
+}
+
+// ─── Module cover upload ────────────────────────────────────────────────────────
+
+const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp']
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
+const COVER_SIZE_LIMIT = 5 * 1024 * 1024 // 5 MB
+
+export async function requestModuleCoverUpload(
+  moduleId: string,
+  fileName: string,
+  fileSize: number,
+  mimeType: string,
+): Promise<ActionResult<{ signedUrl: string; token: string; path: string }>> {
+  try {
+    await requireAdmin()
+
+    if (!moduleId) return fail('moduleId é obrigatório.')
+    if (!IMAGE_MIMES.includes(mimeType)) {
+      return fail('Apenas imagens (jpg, png, webp) são permitidas para capa do módulo.')
+    }
+    if (fileSize > COVER_SIZE_LIMIT) {
+      return fail('A capa do módulo deve ter no máximo 5 MB.')
+    }
+
+    const ext = MIME_TO_EXT[mimeType] ?? 'jpg'
+    const uuid = randomUUID()
+    const path = `modules/${moduleId}/${uuid}.${ext}`
+
+    const adminClient = createAdminClient()
+    const { data, error } = await adminClient.storage
+      .from('covers')
+      .createSignedUploadUrl(path)
+
+    if (error || !data) {
+      console.error('[requestModuleCoverUpload] signed URL error:', error?.message)
+      return fail('Não foi possível gerar URL de upload. Tente novamente.')
+    }
+
+    return ok({ signedUrl: data.signedUrl, token: data.token, path })
+  } catch (err) {
+    console.error('[requestModuleCoverUpload] unexpected error:', err)
+    return fail()
+  }
+}
+
+export async function updateModuleCover(
+  moduleId: string,
+  pathId: string,
+  coverPath: string | null,
+): Promise<ActionResult> {
+  try {
+    await requireAdmin()
+
+    if (!moduleId) return fail('moduleId é obrigatório.')
+
+    const supabase = await createServerClient()
+    const { error } = await supabase
+      .from('modules')
+      .update({ cover_path: coverPath })
+      .eq('id', moduleId)
+
+    if (error) {
+      console.error('[updateModuleCover] DB error:', error.message)
+      return fail()
+    }
+
+    revalidatePath(`/admin/trilhas/${pathId}`)
+    return ok()
+  } catch (err) {
+    console.error('[updateModuleCover] unexpected error:', err)
     return fail()
   }
 }

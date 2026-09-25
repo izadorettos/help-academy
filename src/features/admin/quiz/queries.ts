@@ -105,7 +105,7 @@ export async function adminGetQuiz(lessonId: string): Promise<AdminQuiz | null> 
 export interface AdminLessonEditorData {
   id: string
   title: string
-  contentType: 'text' | 'video' | 'pdf' | 'link' | 'embed'
+  contentType: 'text' | 'video' | 'pdf' | 'link' | 'embed' | 'task' | 'challenge' | 'survey' | 'game' | 'image' | 'presentation'
   content: string | null
   externalUrl: string | null
   filePath: string | null

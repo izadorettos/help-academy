@@ -10,7 +10,7 @@ export const lessonSchema = z
       .max(160, 'Título deve ter no máximo 160 caracteres')
       .trim(),
     content_type: z.enum(
-      ['text', 'video', 'pdf', 'link', 'embed', 'task', 'challenge', 'survey', 'game'],
+      ['text', 'video', 'pdf', 'link', 'embed', 'task', 'challenge', 'survey', 'game', 'image', 'presentation'],
       { error: 'Tipo de conteúdo inválido' },
     ),
     content: z.string().optional(),
@@ -61,13 +61,7 @@ export const lessonSchema = z
         })
       }
     }
-    if (data.content_type === 'pdf' && !data.file_path) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['file_path'],
-        message: 'Caminho do arquivo é obrigatório para aulas PDF',
-      })
-    }
+    // pdf/image/presentation file_path is optional at creation (uploaded separately via signed URL)
     if ((ACTIVITY_TYPES as readonly string[]).includes(data.content_type)) {
       const cfg = data.config
       if (!cfg || typeof cfg !== 'object' || Array.isArray(cfg) || Object.keys(cfg).length === 0) {

@@ -8,7 +8,7 @@ export interface AdminLessonWithBreadcrumb {
   pathId: string
   pathTitle: string
   title: string
-  contentType: 'text' | 'video' | 'pdf' | 'link' | 'embed'
+  contentType: 'text' | 'video' | 'pdf' | 'link' | 'embed' | 'task' | 'challenge' | 'survey' | 'game' | 'image' | 'presentation'
   estimatedMinutes: number | null
   required: boolean
   published: boolean
@@ -19,7 +19,7 @@ export interface AdminLessonWithBreadcrumb {
 }
 
 export interface AdminLessonFilters {
-  contentType?: 'text' | 'video' | 'pdf' | 'link' | 'embed'
+  contentType?: 'text' | 'video' | 'pdf' | 'link' | 'embed' | 'task' | 'challenge' | 'survey' | 'game' | 'image' | 'presentation'
   published?: boolean
   pathId?: string
   page?: number

@@ -729,14 +729,29 @@ export async function getLessonForMember(
     if (idx >= 0 && idx < sortedNav.length - 1) nextLessonId = sortedNav[idx + 1]!.id
   }
 
-  // 5. Generate signed URL for PDF lessons
+  // 5. Generate signed URL for PDF, image, presentation lessons and file-based video
   let signedPdfUrl: string | null = null
-  if (lessonRow.content_type === 'pdf' && lessonRow.file_path) {
+  if (lessonRow.file_path) {
+    const contentType = lessonRow.content_type
     const adminClient = createAdminClient()
-    const { data: signedData } = await adminClient.storage
-      .from('lesson-files')
-      .createSignedUrl(lessonRow.file_path, 3600)
-    signedPdfUrl = signedData?.signedUrl ?? null
+    if (contentType === 'pdf') {
+      // Legacy PDFs may be in lesson-files bucket
+      const { data: signedData } = await adminClient.storage
+        .from('lesson-files')
+        .createSignedUrl(lessonRow.file_path, 3600)
+      signedPdfUrl = signedData?.signedUrl ?? null
+    } else if (['image', 'presentation'].includes(contentType)) {
+      const { data: signedData } = await adminClient.storage
+        .from('lesson-media')
+        .createSignedUrl(lessonRow.file_path, 3600)
+      signedPdfUrl = signedData?.signedUrl ?? null
+    } else if (contentType === 'video') {
+      // Video can be file-based (lesson-media) if file_path is set
+      const { data: signedData } = await adminClient.storage
+        .from('lesson-media')
+        .createSignedUrl(lessonRow.file_path, 3600)
+      signedPdfUrl = signedData?.signedUrl ?? null
+    }
   }
 
   // 6. Fetch quiz for this lesson (WITHOUT is_correct — members never get the answer key)
