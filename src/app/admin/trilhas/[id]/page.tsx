@@ -5,11 +5,12 @@ import { requireAdmin } from '@/lib/auth/guards'
 import { adminGetPath } from '@/features/admin/paths/queries'
 import { adminGetDepartments } from '@/features/admin/departments/queries'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { PathStatusActions } from '../path-status-actions'
 import { DepartmentAssignment } from './department-assignment'
 import { ModuleBuilder } from './module-builder'
-import { Pencil, ArrowLeft } from 'lucide-react'
+import { Pencil, ArrowLeft, Plus } from 'lucide-react'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
@@ -67,6 +68,12 @@ export default async function TrilhaBuilderPage({ params }: Props) {
           <p className="text-text-subtle mt-1 font-mono text-xs">/trilhas/{path.slug}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <Link href={`/admin/conteudos/novo?trilha=${id}`}>
+            <Button size="sm">
+              <Plus className="size-4" aria-hidden />
+              Novo conteúdo
+            </Button>
+          </Link>
           <Link
             href={`/admin/trilhas/${id}/editar`}
             className="text-text-muted hover:text-text hover:bg-surface-muted inline-flex min-h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors"

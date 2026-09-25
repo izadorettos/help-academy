@@ -4,7 +4,13 @@ import { useActionState, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { createPath, updatePath } from '@/features/admin/paths/actions'
+import { ImageUpload } from '@/components/admin/image-upload'
+import { createPath, updatePath, requestTrailCoverUpload, updateTrailCoverUrl } from '@/features/admin/paths/actions'
+
+function getCoversPublicUrl(storagePath: string): string {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+  return `${supabaseUrl}/storage/v1/object/public/covers/${storagePath}`
+}
 import { generateSlug } from '@/features/admin/paths/schemas'
 import type { AdminPathDetail } from '@/features/admin/paths/queries'
 import type { AdminDepartment } from '@/features/admin/departments/queries'
@@ -37,6 +43,7 @@ export function PathForm({ mode, path, departments }: Props) {
   const router = useRouter()
   const [slugTouched, setSlugTouched] = useState(mode === 'edit')
   const [slugValue, setSlugValue] = useState(path?.slug ?? '')
+  const [coverUrl, setCoverUrl] = useState<string | null>(path?.coverUrl ?? null)
 
   const initialCreateState: ActionResult<{ id: string }> = { ok: false, error: '' }
   const initialUpdateState: ActionResult = { ok: false, error: '' }
@@ -210,6 +217,36 @@ export function PathForm({ mode, path, departments }: Props) {
           </p>
         </div>
       </div>
+
+      {/* Cover image (only in edit mode, since we need the path id) */}
+      {mode === 'edit' && path && (
+        <div className="space-y-2">
+          <span className="block text-sm font-medium">Capa da trilha</span>
+          <ImageUpload
+            label="Imagem de capa (16:9, recomendado 1600×900)"
+            currentUrl={coverUrl}
+            onUploadStart={async (fileName, fileSize, mimeType) => {
+              const result = await requestTrailCoverUpload(path.id, fileName, fileSize, mimeType)
+              if (!result.ok) return { error: result.error }
+              return result.data
+            }}
+            onConfirm={async (storagePath) => {
+              if (!storagePath) {
+                // Remove cover
+                await updateTrailCoverUrl(path.id, null)
+                setCoverUrl(null)
+                return
+              }
+              const publicUrl = getCoversPublicUrl(storagePath)
+              await updateTrailCoverUrl(path.id, publicUrl)
+              setCoverUrl(publicUrl)
+            }}
+            aspectRatio="16/9"
+            maxSizeMb={5}
+          />
+          <input type="hidden" name="cover_url" value={coverUrl ?? ''} />
+        </div>
+      )}
 
       {!state.ok && state.error !== '' && !state.fieldErrors && (
         <p className="text-danger text-sm" role="alert">

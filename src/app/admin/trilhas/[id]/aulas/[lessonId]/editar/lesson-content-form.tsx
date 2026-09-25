@@ -2,7 +2,9 @@
 
 import { useState, useTransition, useRef } from 'react'
 import { Button } from '@/components/ui/button'
+import { MediaUpload } from '@/components/admin/media-upload'
 import { updateLessonContent } from '@/features/admin/lessons/actions'
+import { requestUpload, confirmUpload, deleteMediaFile } from '@/features/admin/media/actions'
 import type { AdminLessonEditorData } from '@/features/admin/quiz/queries'
 
 interface Props {
@@ -16,6 +18,8 @@ const CONTENT_TYPE_LABEL: Record<string, string> = {
   link: 'Link',
   embed: 'Embed',
   pdf: 'PDF',
+  image: 'Imagem',
+  presentation: 'Apresentação',
 }
 
 export function LessonContentForm({ lesson, pathId }: Props) {
@@ -226,6 +230,32 @@ export function LessonContentForm({ lesson, pathId }: Props) {
         </div>
       )}
 
+      {/* IMAGE type */}
+      {contentType === 'image' && (
+        <MediaUpload
+          kind="image"
+          lessonId={lesson.id}
+          pathId={pathId}
+          currentFilePath={lesson.filePath}
+          onRequestUpload={requestUpload}
+          onConfirmUpload={confirmUpload}
+          onDeleteFile={deleteMediaFile}
+        />
+      )}
+
+      {/* PRESENTATION type */}
+      {contentType === 'presentation' && (
+        <MediaUpload
+          kind="presentation"
+          lessonId={lesson.id}
+          pathId={pathId}
+          currentFilePath={lesson.filePath}
+          onRequestUpload={requestUpload}
+          onConfirmUpload={confirmUpload}
+          onDeleteFile={deleteMediaFile}
+        />
+      )}
+
       {error && (
         <p className="text-danger text-sm" role="alert">
           {error}
@@ -238,11 +268,14 @@ export function LessonContentForm({ lesson, pathId }: Props) {
         </p>
       )}
 
-      <div className="flex gap-3">
-        <Button type="submit" loading={isPending}>
-          Salvar conteúdo
-        </Button>
-      </div>
+      {/* Image and presentation use MediaUpload — no traditional form submit */}
+      {contentType !== 'image' && contentType !== 'presentation' && (
+        <div className="flex gap-3">
+          <Button type="submit" loading={isPending}>
+            Salvar conteúdo
+          </Button>
+        </div>
+      )}
     </form>
   )
 }

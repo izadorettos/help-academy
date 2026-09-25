@@ -5,9 +5,10 @@ import { adminGetLessons } from '@/features/admin/lessons/queries'
 import { adminGetPaths } from '@/features/admin/paths/queries'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { LessonsFilter } from './lessons-filter'
-import { FileText, Video, Link as LinkIcon, Code, File, BookOpen } from 'lucide-react'
+import { FileText, Video, Link as LinkIcon, Code, File, BookOpen, Plus } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Conteúdos — Admin — Help Academy' }
 
@@ -63,11 +64,19 @@ export default async function AdminConteudosPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-h1 font-bold">Conteúdos</h1>
-        <p className="text-text-muted mt-1 text-sm">
-          Todas as aulas da plataforma, de todas as trilhas.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-h1 font-bold">Conteúdos</h1>
+          <p className="text-text-muted mt-1 text-sm">
+            Todas as aulas da plataforma, de todas as trilhas.
+          </p>
+        </div>
+        <Link href="/admin/conteudos/novo">
+          <Button>
+            <Plus className="size-4" aria-hidden />
+            Novo conteúdo
+          </Button>
+        </Link>
       </div>
 
       <LessonsFilter

@@ -464,14 +464,20 @@ export function ModuleBuilder({ pathId, modules: initialModules }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="px-4 py-3">
-                    <button
-                      type="button"
-                      onClick={() => setAddingLessonForModule(module.id)}
+                  <div className="flex items-center gap-4 px-4 py-3">
+                    <Link
+                      href={`/admin/conteudos/novo?trilha=${pathId}&modulo=${module.id}`}
                       className="text-brand hover:text-brand-hover inline-flex items-center gap-2 text-sm font-medium transition-colors"
                     >
                       <Plus className="size-4" aria-hidden />
-                      Adicionar aula
+                      Adicionar conteúdo
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setAddingLessonForModule(module.id)}
+                      className="text-text-muted hover:text-text inline-flex items-center gap-1.5 text-xs transition-colors"
+                    >
+                      Forma rápida
                     </button>
                   </div>
                 )}
