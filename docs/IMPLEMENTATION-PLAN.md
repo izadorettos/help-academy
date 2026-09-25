@@ -32,6 +32,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 19 | Auth desacoplada (`AUTH-PROVIDER.md`) | Demo Lucas | 16 | ✅ |
 | 20 | Novos formatos de atividade (`DEMO-TRILHA.md` §2–3) | Demo Lucas | 18 | ✅ |
 | 21 | Trilha demo “Conhecendo a HELP” (`DEMO-TRILHA.md` §4–6) | Demo Lucas | 20 | ✅ |
+| 22 | Mídia, “Novo conteúdo” e capa do módulo (`CONTEUDO-MIDIA.md`) | Pedido Lucas | 21 | ✅ |
 
 \* O dashboard é construído na fase 7 com dados reais disponíveis (trilhas, progresso por view); os cards de XP/conquistas são ligados nas fases 12–13. Sem dados falsos: enquanto não existirem, os cards mostram estado vazio real.
 
@@ -405,3 +406,10 @@ Migrations 0015–0018, RPCs `save_lesson_progress`, `submit_activity`, `check_q
 **Concluída quando:** um E2E por formato (7, caminho feliz + erro) e `demo-journey.spec.ts` do começo ao fim em 390×844 e 1440×900; teste de remoção sem resíduos; axe; lint, typecheck, test, build verdes; relatório final com: formatos funcionando, como testar cada um, usuário demo, dependências da auth HELP e perguntas ao TI (`AUTH-PROVIDER.md` §3–4).
 
 **Resultado:** `supabase/demo/conhecendo-a-help.sql` (7 aulas: vídeo, texto, quiz, game, tarefa, desafio, questionário); `supabase/demo/demo-user.sql`; `supabase/demo/remove.sql`; `scripts/demo.mjs` (seed/reset/remove); `tests/e2e/demo-helpers.ts`; 7 specs E2E de formato + `demo-journey.spec.ts` (mobile 390×844 e desktop 1440×900); usuário `demo@help.local`, senha em `.env.local` (DEMO_USER_PASSWORD); lint, typecheck, test (210/210), build limpos.
+
+
+### FASE 22 — Mídia, “Novo conteúdo” e capa do módulo  ✅
+Pedidos do Lucas (24/09/2026). Especificação: `docs/CONTEUDO-MIDIA.md` §1–4. Upload direto ao Storage por URL assinada (nunca pela Server Action), bucket `lesson-media`, tipos `image` e `presentation`, vídeo por arquivo, capa de módulo e de trilha, fluxo de 3 passos em `/admin/conteudos/novo`.
+**Concluída quando:** admin cria cada tipo pelo botão “Novo conteúdo” com upload real e o membro consome e conclui; capa do módulo aparece para o membro; pgTAP de RLS do bucket; E2E admin→membro em 390×844 e 1440×900; axe; lint, typecheck, test, build verdes. A trilha “Integração Grupo CO” (§5) **não** é seed: fica para a Thais montar após as decisões pendentes.
+
+**Resultado:** migration `0020_lesson_media.sql` (bucket `lesson-media` privado, tipos `image`/`presentation` no enum, coluna `modules.cover_path`); tipos DB atualizados manualmente; actions `requestUpload`, `confirmUpload`, `deleteMediaFile`, `requestSignedReadUrl` em `src/features/admin/media/actions.ts`; actions de capa de módulo em `src/features/admin/modules/actions.ts` e de capa de trilha em `src/features/admin/paths/actions.ts`; componentes `<ImageUpload>` e `<MediaUpload>` em `src/components/admin/`; wizard 3 passos em `/admin/conteudos/novo`; botão “Novo conteúdo” em `/admin/conteudos`, `/admin/trilhas/[id]` e em cada módulo do construtor; visualizadores `ImageLesson` e `PresentationLesson`; `lesson-content-form` atualizado para imagem/apresentação; `ActivityStepper` atualizado com novos ícones; `LessonViewer` atualizado para image/presentation/file-video; 38 testes unitários em `media-upload.test.ts`; pgTAP em `lesson_media_rls.test.sql`; E2E em `phase22-upload.spec.ts`; lint, typecheck, test (248/248), build verdes.
