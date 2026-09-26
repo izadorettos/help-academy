@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { BrandLogo } from '@/components/brand/brand-logo'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BookOpen, Award, User, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Award, User, Settings, LogOut, LifeBuoy } from 'lucide-react'
 import { Avatar } from '@/components/ui/avatar'
 import { signOut } from '@/features/auth/actions'
 import type { SessionUser } from '@/lib/auth/guards'
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/trilhas', label: 'Minhas trilhas', icon: BookOpen },
   { href: '/conquistas', label: 'Conquistas', icon: Award },
+  { href: '/ajuda', label: 'Central de Ajuda', icon: LifeBuoy },
   { href: '/perfil', label: 'Perfil', icon: User },
 ]
 

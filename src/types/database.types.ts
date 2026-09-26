@@ -889,6 +889,248 @@ export type Database = {
           },
         ]
       }
+      help_audiences: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          description: string | null
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          description?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          description?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      help_categories: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          icon: string
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          icon?: string
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          icon?: string
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      help_series: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tutorials: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          description: string
+          category_id: string
+          series_id: string | null
+          series_position: number | null
+          content_type: Database["public"]["Enums"]["tutorial_content_type"]
+          video_url: string | null
+          file_url: string | null
+          thumbnail_url: string | null
+          duration_seconds: number | null
+          pages: number | null
+          file_size_bytes: number | null
+          mime_type: string | null
+          sha256: string | null
+          app_version: string | null
+          freshness: Database["public"]["Enums"]["tutorial_freshness"]
+          freshness_note: string | null
+          visibility: Database["public"]["Enums"]["tutorial_visibility"]
+          is_published: boolean
+          is_featured: boolean
+          sort_order: number
+          source_file: string | null
+          date_source: string | null
+          last_content_update: string
+          created_by: string | null
+          updated_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          title: string
+          description: string
+          category_id: string
+          series_id?: string | null
+          series_position?: number | null
+          content_type: Database["public"]["Enums"]["tutorial_content_type"]
+          video_url?: string | null
+          file_url?: string | null
+          thumbnail_url?: string | null
+          duration_seconds?: number | null
+          pages?: number | null
+          file_size_bytes?: number | null
+          mime_type?: string | null
+          sha256?: string | null
+          app_version?: string | null
+          freshness?: Database["public"]["Enums"]["tutorial_freshness"]
+          freshness_note?: string | null
+          visibility?: Database["public"]["Enums"]["tutorial_visibility"]
+          is_published?: boolean
+          is_featured?: boolean
+          sort_order?: number
+          source_file?: string | null
+          date_source?: string | null
+          last_content_update: string
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          title?: string
+          description?: string
+          category_id?: string
+          series_id?: string | null
+          series_position?: number | null
+          content_type?: Database["public"]["Enums"]["tutorial_content_type"]
+          video_url?: string | null
+          file_url?: string | null
+          thumbnail_url?: string | null
+          duration_seconds?: number | null
+          pages?: number | null
+          file_size_bytes?: number | null
+          mime_type?: string | null
+          sha256?: string | null
+          app_version?: string | null
+          freshness?: Database["public"]["Enums"]["tutorial_freshness"]
+          freshness_note?: string | null
+          visibility?: Database["public"]["Enums"]["tutorial_visibility"]
+          is_published?: boolean
+          is_featured?: boolean
+          sort_order?: number
+          source_file?: string | null
+          date_source?: string | null
+          last_content_update?: string
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutorials_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "help_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutorials_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "help_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutorials_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutorials_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutorial_audiences: {
+        Row: {
+          tutorial_id: string
+          audience_id: string
+        }
+        Insert: {
+          tutorial_id: string
+          audience_id: string
+        }
+        Update: {
+          tutorial_id?: string
+          audience_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutorial_audiences_tutorial_id_fkey"
+            columns: ["tutorial_id"]
+            isOneToOne: false
+            referencedRelation: "tutorials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutorial_audiences_audience_id_fkey"
+            columns: ["audience_id"]
+            isOneToOne: false
+            referencedRelation: "help_audiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       v_user_path_access: {
@@ -1006,6 +1248,9 @@ export type Database = {
         | "module_completed"
         | "path_completed"
         | "game_perfect"
+      tutorial_content_type: "video" | "pdf" | "image" | "app" | "link" | "article"
+      tutorial_freshness: "current" | "needs_update" | "needs_review"
+      tutorial_visibility: "authenticated" | "public"
     }
     CompositeTypes: {
       [_ in never]: never

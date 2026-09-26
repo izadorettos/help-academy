@@ -1,12 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BookOpen, Award, User } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Award, User, LifeBuoy } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/trilhas', label: 'Trilhas', icon: BookOpen },
   { href: '/conquistas', label: 'Conquistas', icon: Award },
+  { href: '/ajuda', label: 'Ajuda', icon: LifeBuoy },
   { href: '/perfil', label: 'Perfil', icon: User },
 ]
 
