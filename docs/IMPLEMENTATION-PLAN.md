@@ -33,7 +33,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 20 | Novos formatos de atividade (`DEMO-TRILHA.md` §2–3) | Demo Lucas | 18 | ✅ |
 | 21 | Trilha demo “Conhecendo a HELP” (`DEMO-TRILHA.md` §4–6) | Demo Lucas | 20 | ✅ |
 | 22 | Mídia, “Novo conteúdo” e capa do módulo (`CONTEUDO-MIDIA.md`) | Pedido Lucas | 21 | ✅ |
-| 23 | Central de Ajuda / tutoriais (`CENTRAL-DE-AJUDA.md`) | Pedido grupo Help | 22 | ⬜ |
+| 23 | Central de Ajuda / tutoriais (`CENTRAL-DE-AJUDA.md`) | Pedido grupo Help | 22 | ✅ |
 
 \* O dashboard é construído na fase 7 com dados reais disponíveis (trilhas, progresso por view); os cards de XP/conquistas são ligados nas fases 12–13. Sem dados falsos: enquanto não existirem, os cards mostram estado vazio real.
 
