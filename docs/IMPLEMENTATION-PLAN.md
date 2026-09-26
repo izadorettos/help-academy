@@ -33,6 +33,7 @@ Legenda de status: ⬜ não iniciada · 🟨 em andamento · ✅ concluída
 | 20 | Novos formatos de atividade (`DEMO-TRILHA.md` §2–3) | Demo Lucas | 18 | ✅ |
 | 21 | Trilha demo “Conhecendo a HELP” (`DEMO-TRILHA.md` §4–6) | Demo Lucas | 20 | ✅ |
 | 22 | Mídia, “Novo conteúdo” e capa do módulo (`CONTEUDO-MIDIA.md`) | Pedido Lucas | 21 | ✅ |
+| 23 | Central de Ajuda / tutoriais (`CENTRAL-DE-AJUDA.md`) | Pedido grupo Help | 22 | ⬜ |
 
 \* O dashboard é construído na fase 7 com dados reais disponíveis (trilhas, progresso por view); os cards de XP/conquistas são ligados nas fases 12–13. Sem dados falsos: enquanto não existirem, os cards mostram estado vazio real.
 
@@ -413,3 +414,8 @@ Pedidos do Lucas (24/09/2026). Especificação: `docs/CONTEUDO-MIDIA.md` §1–4
 **Concluída quando:** admin cria cada tipo pelo botão “Novo conteúdo” com upload real e o membro consome e conclui; capa do módulo aparece para o membro; pgTAP de RLS do bucket; E2E admin→membro em 390×844 e 1440×900; axe; lint, typecheck, test, build verdes. A trilha “Integração Grupo CO” (§5) **não** é seed: fica para a Thais montar após as decisões pendentes.
 
 **Resultado:** migration `0020_lesson_media.sql` (bucket `lesson-media` privado, tipos `image`/`presentation` no enum, coluna `modules.cover_path`); tipos DB atualizados manualmente; actions `requestUpload`, `confirmUpload`, `deleteMediaFile`, `requestSignedReadUrl` em `src/features/admin/media/actions.ts`; actions de capa de módulo em `src/features/admin/modules/actions.ts` e de capa de trilha em `src/features/admin/paths/actions.ts`; componentes `<ImageUpload>` e `<MediaUpload>` em `src/components/admin/`; wizard 3 passos em `/admin/conteudos/novo`; botão “Novo conteúdo” em `/admin/conteudos`, `/admin/trilhas/[id]` e em cada módulo do construtor; visualizadores `ImageLesson` e `PresentationLesson`; `lesson-content-form` atualizado para imagem/apresentação; `ActivityStepper` atualizado com novos ícones; `LessonViewer` atualizado para image/presentation/file-video; 38 testes unitários em `media-upload.test.ts`; pgTAP em `lesson_media_rls.test.sql`; E2E em `phase22-upload.spec.ts`; lint, typecheck, test (248/248), build verdes.
+
+
+### FASE 23 — Central de Ajuda (tutoriais)  ⬜
+Pedido do grupo Help (26/09/2026): vídeo novo da Visão Estabelecimento, materiais para entregadores (YouTube/PDF/passo a passo visual) e painel com todos os materiais e a data da última atualização. Especificação completa em `docs/CENTRAL-DE-AJUDA.md`; conteúdo em `content/tutoriais/catalog.json` (23 materiais já analisados, sem conteúdo inventado); mídia pronta para web em `~/Documents/help-academy-midia/tutoriais/` (fora do git).
+**Concluída quando:** migration + RLS + bucket `tutorials`; `npm run tutorials:import` idempotente carregando os 23 materiais; `/ajuda` com busca, filtros por público/categoria/tipo, cartões, séries e relacionados; `/ajuda/[slug]` com player/visualizador por tipo; seções no dashboard do membro e do admin; CRUD em `/admin/tutoriais` integrado ao admin atual; pgTAP, unitários e E2E (390×844 e 1440×900, zero erro de console, axe); lint, typecheck, test, build verdes.

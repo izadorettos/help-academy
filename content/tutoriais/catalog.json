@@ -1,0 +1,577 @@
+{
+  "generated_at": "2026-09-26",
+  "audiences": [
+    {
+      "slug": "estabelecimentos",
+      "name": "Estabelecimentos",
+      "description": "Lojas e parceiros que usam o painel da Help para lançar e acompanhar pedidos.",
+      "sort_order": 1
+    },
+    {
+      "slug": "entregadores",
+      "name": "Entregadores",
+      "description": "Entregadores parceiros que usam o app Help Entregas.",
+      "sort_order": 2
+    },
+    {
+      "slug": "operacao",
+      "name": "Administradores / Operação",
+      "description": "Time Help que usa o painel administrativo.",
+      "sort_order": 3
+    },
+    {
+      "slug": "geral",
+      "name": "Todos os públicos",
+      "description": "Ajuda técnica útil para qualquer pessoa.",
+      "sort_order": 4
+    }
+  ],
+  "categories": [
+    {
+      "slug": "primeiros-passos",
+      "name": "Primeiros passos",
+      "icon": "Compass",
+      "sort_order": 1
+    },
+    {
+      "slug": "painel-do-estabelecimento",
+      "name": "Painel do estabelecimento",
+      "icon": "Store",
+      "sort_order": 2
+    },
+    {
+      "slug": "roteamento-inteligente",
+      "name": "Roteamento inteligente",
+      "icon": "Route",
+      "sort_order": 3
+    },
+    {
+      "slug": "corridas-e-entregas",
+      "name": "Corridas e entregas",
+      "icon": "Bike",
+      "sort_order": 4
+    },
+    {
+      "slug": "prazos-e-prioridades",
+      "name": "Prazos e prioridades",
+      "icon": "Timer",
+      "sort_order": 5
+    },
+    {
+      "slug": "pagamentos-e-taxas",
+      "name": "Pagamentos e taxas",
+      "icon": "Wallet",
+      "sort_order": 6
+    },
+    {
+      "slug": "precos-e-tabelas",
+      "name": "Preços e tabelas",
+      "icon": "Calculator",
+      "sort_order": 7
+    },
+    {
+      "slug": "suporte-e-problemas-tecnicos",
+      "name": "Suporte e problemas técnicos",
+      "icon": "LifeBuoy",
+      "sort_order": 8
+    }
+  ],
+  "series": [
+    {
+      "slug": "visao-estabelecimento",
+      "name": "Visão Estabelecimento",
+      "description": "Sequência sobre o painel do estabelecimento: visão geral, fluxo de pedido e roteamento inteligente."
+    },
+    {
+      "slug": "app-do-entregador",
+      "name": "App do entregador",
+      "description": "Materiais numerados da pasta Tutoriais Help Entregadores, na ordem original."
+    }
+  ],
+  "tutorials": [
+    {
+      "slug": "visao-estabelecimento-visao-geral",
+      "title": "Visão Estabelecimento · Parte 1: visão geral do painel",
+      "description": "Tour pelo painel do estabelecimento: dashboard com pedidos concluídos e cancelados e relatório por período, perfil do estabelecimento, cadastro de novo pedido passo a passo, pedidos em andamento, histórico do pedido, edição de destino e inclusão de paradas.",
+      "audiences": [
+        "estabelecimentos"
+      ],
+      "category": "painel-do-estabelecimento",
+      "content_type": "video",
+      "series": "visao-estabelecimento",
+      "series_position": 1,
+      "source_file": "Tutorial_Help_Visa_o_Estabelecimento_2.mp4",
+      "media": "visao-estabelecimento-visao-geral.mp4",
+      "last_content_update": "2026-01-15",
+      "date_source": "metadado do vídeo (DaVinci Resolve)",
+      "is_featured": true,
+      "needs_update": true,
+      "update_note": "Gravado no layout anterior do painel. A equipe pediu um vídeo novo no layout atual.",
+      "sort_order": 10,
+      "needs_review": false,
+      "thumbnail": "visao-estabelecimento-visao-geral.jpg",
+      "duration_seconds": 1055
+    },
+    {
+      "slug": "visao-estabelecimento-fluxo-de-pedido",
+      "title": "Visão Estabelecimento · Parte 2: fluxo de pedido",
+      "description": "Um pedido do cadastro à entrega: status Alocando entregador, Em retirada, No local de retirada, Em trânsito e Entregue; menu de ações (iniciar chat, liberar entregador para corrida, cancelar, adicionar parada, editar destino, detalhes, localização do entregador) e QR Code para o entregador escanear.",
+      "audiences": [
+        "estabelecimentos"
+      ],
+      "category": "painel-do-estabelecimento",
+      "content_type": "video",
+      "series": "visao-estabelecimento",
+      "series_position": 2,
+      "source_file": "Tutorial_Help_Visa_o_Estabelecimento-_Fluxo_de_pedido_2.mp4",
+      "media": "visao-estabelecimento-fluxo-de-pedido.mp4",
+      "last_content_update": "2026-01-16",
+      "date_source": "metadado do vídeo (DaVinci Resolve)",
+      "is_featured": true,
+      "needs_update": true,
+      "update_note": "Gravado no layout anterior do painel. A equipe pediu um vídeo novo no layout atual.",
+      "sort_order": 20,
+      "needs_review": false,
+      "thumbnail": "visao-estabelecimento-fluxo-de-pedido.jpg",
+      "duration_seconds": 257
+    },
+    {
+      "slug": "roteamento-inteligente",
+      "title": "Visão Estabelecimento · Parte 3: roteamento inteligente",
+      "description": "No layout atual do painel: aba Roteamento inteligente do perfil (pedidos Em espera, quebrar e encaixar pedidos automaticamente, tempo máximo de percurso, tempo de espera por novas corridas e limite de quilometragem) e a tela Pedidos em Espera, com mapa, liberação e agrupamento de pedidos.",
+      "audiences": [
+        "estabelecimentos"
+      ],
+      "category": "roteamento-inteligente",
+      "content_type": "video",
+      "series": "visao-estabelecimento",
+      "series_position": 3,
+      "source_file": "tutorial_roteamento_inteligente_2.mp4",
+      "media": "roteamento-inteligente.mp4",
+      "last_content_update": "2026-09-04",
+      "date_source": "metadado do vídeo (DaVinci Resolve)",
+      "is_featured": true,
+      "sort_order": 30,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "roteamento-inteligente.jpg",
+      "duration_seconds": 608
+    },
+    {
+      "slug": "limpar-cache-do-navegador",
+      "title": "Como limpar o cache do navegador",
+      "description": "Como limpar o cache e recarregar a página do painel da Help no navegador, usando as ferramentas do desenvolvedor, a partir da tela de novo pedido.",
+      "audiences": [
+        "estabelecimentos"
+      ],
+      "category": "suporte-e-problemas-tecnicos",
+      "content_type": "video",
+      "source_file": "Como_limpar_o_cache_do_navegador.mp4",
+      "media": "limpar-cache-do-navegador.mp4",
+      "last_content_update": "2026-09-26",
+      "date_source": "data de importação (arquivo sem data)",
+      "sort_order": 40,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "limpar-cache-do-navegador.jpg",
+      "duration_seconds": 42
+    },
+    {
+      "slug": "adicionar-parada-pedido-radial",
+      "title": "Adicionar parada em pedido radial e conferir o novo valor",
+      "description": "No histórico de pedidos do painel administrativo: editar os endereços de um pedido, inserir uma nova parada, recalcular o preço e salvar, comparando o valor antes e depois e consultando a tabela de preços do estabelecimento.",
+      "audiences": [
+        "operacao"
+      ],
+      "category": "precos-e-tabelas",
+      "content_type": "video",
+      "source_file": "Adicionar_parada_em_pedido_radial__Diminuiu_valor__1.mp4",
+      "media": "adicionar-parada-pedido-radial.mp4",
+      "last_content_update": "2026-03-26",
+      "date_source": "data exibida na tela do vídeo",
+      "sort_order": 50,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "adicionar-parada-pedido-radial.jpg",
+      "duration_seconds": 237
+    },
+    {
+      "slug": "verificar-preco-de-um-pedido",
+      "title": "Como verificar o preço de um pedido",
+      "description": "Como conferir o preço de um pedido no painel administrativo: detalhes do pedido no histórico, tabela de preços aplicada ao estabelecimento e faixa de quilometragem correspondente.",
+      "audiences": [
+        "operacao"
+      ],
+      "category": "precos-e-tabelas",
+      "content_type": "video",
+      "source_file": "Tutorial_como_verificar_prec_o_de_um_pedido_1.mp4",
+      "media": "verificar-preco-de-um-pedido.mp4",
+      "last_content_update": "2026-03-21",
+      "date_source": "data exibida na tela do vídeo",
+      "sort_order": 60,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "verificar-preco-de-um-pedido.jpg",
+      "duration_seconds": 220
+    },
+    {
+      "slug": "verificar-valor-da-volta",
+      "title": "Verificar o valor da volta com modalidade e dinâmica",
+      "description": "Como conferir o valor da volta de um pedido considerando a modalidade e a dinâmica, a partir do histórico do pedido e das tabelas de preço por modalidade.",
+      "audiences": [
+        "operacao"
+      ],
+      "category": "precos-e-tabelas",
+      "content_type": "video",
+      "source_file": "Verificar_valor_da_volta_de_pedido_com_modalidade_e_dina_mica_1.mp4",
+      "media": "verificar-valor-da-volta.mp4",
+      "last_content_update": "2026-03-22",
+      "date_source": "data exibida na tela do vídeo",
+      "sort_order": 70,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "verificar-valor-da-volta.jpg",
+      "duration_seconds": 156
+    },
+    {
+      "slug": "app-help-entregas-gestor",
+      "title": "App HelpEntregas Gestor para Android",
+      "description": "Instalador Android do aplicativo HelpEntregas Gestor, versão 1.0.0. Requer Android 7.0 ou superior.",
+      "audiences": [
+        "operacao"
+      ],
+      "category": "primeiros-passos",
+      "content_type": "app",
+      "source_file": "app-gestor-release.apk",
+      "media": "app-help-entregas-gestor-1.0.0.apk",
+      "last_content_update": "2026-09-26",
+      "date_source": "data de importação (versão 1.0.0 no pacote)",
+      "needs_review": true,
+      "review_note": "Confirmar com a Help para quem é o app e se o download deve ficar disponível.",
+      "sort_order": 80,
+      "is_featured": false,
+      "needs_update": false,
+      "thumbnail": "app-help-entregas-gestor.jpg"
+    },
+    {
+      "slug": "converter-heic-para-jpg",
+      "title": "Converter fotos HEIC para JPG",
+      "description": "Como converter fotos no formato HEIC para JPG no computador com Windows, usando um conversor on-line.",
+      "audiences": [
+        "geral"
+      ],
+      "category": "suporte-e-problemas-tecnicos",
+      "content_type": "video",
+      "source_file": "Convertendo_arquivos_HEIC_para_JPG.mp4",
+      "media": "converter-heic-para-jpg.mp4",
+      "last_content_update": "2026-05-28",
+      "date_source": "data exibida na tela do vídeo",
+      "sort_order": 90,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "converter-heic-para-jpg.jpg",
+      "duration_seconds": 161
+    },
+    {
+      "slug": "guia-do-entregador",
+      "title": "Guia rápido do entregador",
+      "description": "Permissões do celular, como aceitar entregas, coleta e taxa de deslocamento, entrega com foto, problema na entrega, devoluções, pagamentos e adiantamento, responsabilidades e suporte.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "primeiros-passos",
+      "content_type": "pdf",
+      "pages": 5,
+      "source_file": "Tutoriais Help Entregadores/Guia do Entregador Help Entregas.pdf",
+      "media": "guia-do-entregador.pdf",
+      "last_content_update": "2026-09-01",
+      "date_source": "data do arquivo na pasta do Drive",
+      "is_featured": true,
+      "sort_order": 100,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "guia-do-entregador.jpg"
+    },
+    {
+      "slug": "entregador-passo-a-passo-da-entrega",
+      "title": "Passo a passo da entrega",
+      "description": "As sete etapas da entrega: ver a corrida, coletar logo após aceitar, conferir o tipo de pedido e o prazo, seguir direto para o cliente, registrar a entrega no app (foto, nome de quem recebeu e finalização), seguir para a próxima corrida e acionar o suporte em caso de ocorrência.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "corridas-e-entregas",
+      "content_type": "image",
+      "source_file": "Tutoriais Help Entregadores/Passo a passo da entrega.jpeg",
+      "media": "entregador-passo-a-passo-da-entrega.jpeg",
+      "last_content_update": "2026-09-11",
+      "date_source": "data do arquivo na pasta do Drive",
+      "is_featured": true,
+      "sort_order": 110,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-passo-a-passo-da-entrega.jpg"
+    },
+    {
+      "slug": "entregador-aceitar-pedido",
+      "title": "Aceitar pedido e tela Alocando",
+      "description": "Tela de nova corrida para aceitar ou recusar dentro do tempo, tela inicial com status online e pausa de propostas, e aba Alocando da tela Pedidos com os detalhes e as paradas de cada pedido.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "corridas-e-entregas",
+      "content_type": "video",
+      "series": "app-do-entregador",
+      "series_position": 1,
+      "source_file": "Tutoriais Help Entregadores/1 Aceitando pedido - tela alocando.mp4",
+      "media": "entregador-aceitar-pedido.mp4",
+      "last_content_update": "2026-03-04",
+      "date_source": "data do arquivo na pasta do Drive",
+      "needs_review": true,
+      "review_note": "As telas do vídeo são de uma versão anterior do app. O vídeo 5 (Ver corridas disponíveis) mostra a interface mais recente.",
+      "sort_order": 120,
+      "is_featured": false,
+      "needs_update": false,
+      "thumbnail": "entregador-aceitar-pedido.jpg",
+      "duration_seconds": 177
+    },
+    {
+      "slug": "entregador-trocar-parada",
+      "title": "Trocar a parada atual",
+      "description": "Em pedidos com mais de uma parada: escolher a parada, definir como parada atual, abrir o trajeto no mapa e finalizar cada parada.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "corridas-e-entregas",
+      "content_type": "video",
+      "series": "app-do-entregador",
+      "series_position": 2,
+      "source_file": "Tutoriais Help Entregadores/2 Trocando parada.mp4",
+      "media": "entregador-trocar-parada.mp4",
+      "last_content_update": "2026-03-04",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 130,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-trocar-parada.jpg",
+      "duration_seconds": 60
+    },
+    {
+      "slug": "entregador-escanear-qr-para-finalizar",
+      "title": "Escanear o QR Code para finalizar",
+      "description": "Na loja, escanear com o app o QR Code gerado pelo estabelecimento para finalizar o pedido.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "corridas-e-entregas",
+      "content_type": "video",
+      "series": "app-do-entregador",
+      "series_position": 3,
+      "source_file": "Tutoriais Help Entregadores/3 Scanear pra finalizar.mp4",
+      "media": "entregador-escanear-qr-para-finalizar.mp4",
+      "last_content_update": "2026-03-04",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 140,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-escanear-qr-para-finalizar.jpg",
+      "duration_seconds": 37
+    },
+    {
+      "slug": "entregador-pagamento-maquininha",
+      "title": "Pagamento na maquininha",
+      "description": "Registro de pagamento no app POS Contingência: ler o QR Code da nota (NFC-e/CF-e), confirmar data, número da nota e PDV e informar o valor do pagamento. Pelo Guia do Entregador, é o processo das entregas da rede Pague Menos.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "pagamentos-e-taxas",
+      "content_type": "video",
+      "series": "app-do-entregador",
+      "series_position": 4,
+      "source_file": "Tutoriais Help Entregadores/4 Pagamento maquininha.mp4",
+      "media": "entregador-pagamento-maquininha.mp4",
+      "last_content_update": "2026-01-23",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 150,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-pagamento-maquininha.jpg",
+      "duration_seconds": 57
+    },
+    {
+      "slug": "entregador-ver-corridas-disponiveis",
+      "title": "Ver corridas disponíveis",
+      "description": "Ficar online, ver as corridas disponíveis na aba Alocando, conferir coleta, destino e detalhes e tocar em Pegar.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "corridas-e-entregas",
+      "content_type": "video",
+      "series": "app-do-entregador",
+      "series_position": 5,
+      "source_file": "Tutoriais Help Entregadores/5 Ver corridas disponiveis.mp4",
+      "media": "entregador-ver-corridas-disponiveis.mp4",
+      "last_content_update": "2026-04-18",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 160,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-ver-corridas-disponiveis.jpg",
+      "duration_seconds": 74
+    },
+    {
+      "slug": "entregador-enviar-localizacao-pelo-chat",
+      "title": "Enviar localização fixa pelo chat",
+      "description": "Compartilhar o seu local no Google Maps, copiar o link e colar no chat de suporte do app.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "suporte-e-problemas-tecnicos",
+      "content_type": "video",
+      "series": "app-do-entregador",
+      "series_position": 6,
+      "source_file": "Tutoriais Help Entregadores/6 Enviando localização fixa pelo chat Help app.mp4",
+      "media": "entregador-enviar-localizacao-pelo-chat.mp4",
+      "last_content_update": "2026-04-24",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 170,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-enviar-localizacao-pelo-chat.jpg",
+      "duration_seconds": 33
+    },
+    {
+      "slug": "entregador-solicitar-deslocamento",
+      "title": "Onde solicitar a taxa de deslocamento",
+      "description": "Mostra o botão Solicitação deslocamento na tela do pedido em retirada. As regras da taxa estão no Guia rápido do entregador.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "pagamentos-e-taxas",
+      "content_type": "image",
+      "series": "app-do-entregador",
+      "series_position": 7,
+      "source_file": "Tutoriais Help Entregadores/7 Solicitar deslocamento.jpeg",
+      "media": "entregador-solicitar-deslocamento.jpeg",
+      "last_content_update": "2026-08-18",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 180,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-solicitar-deslocamento.jpg"
+    },
+    {
+      "slug": "entregador-prazos-por-modalidade",
+      "title": "Painel de prazos por modalidade",
+      "description": "Prazos de cada modalidade: Super Expressa 40 min, Expressa 1h30, Padrão 1h30 e Econômica 22h.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "prazos-e-prioridades",
+      "content_type": "image",
+      "series": "app-do-entregador",
+      "series_position": 8,
+      "source_file": "Tutoriais Help Entregadores/8 Prazos.jpeg",
+      "media": "entregador-prazos-por-modalidade.jpeg",
+      "last_content_update": "2026-07-09",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 190,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-prazos-por-modalidade.jpg"
+    },
+    {
+      "slug": "entregador-chat-com-suporte",
+      "title": "Abrir o chat com o suporte",
+      "description": "O ícone de atendimento no topo da tela inicial do app abre o chat com o suporte.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "suporte-e-problemas-tecnicos",
+      "content_type": "image",
+      "series": "app-do-entregador",
+      "series_position": 9,
+      "source_file": "Tutoriais Help Entregadores/9 Chat.jpeg",
+      "media": "entregador-chat-com-suporte.jpeg",
+      "last_content_update": "2026-04-15",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 200,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-chat-com-suporte.jpg"
+    },
+    {
+      "slug": "entregador-registrar-problema-na-entrega",
+      "title": "Registrar problema na entrega",
+      "description": "Mostra o botão Problema na entrega na tela do pedido em trânsito. Quando usar está no Guia rápido do entregador.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "corridas-e-entregas",
+      "content_type": "image",
+      "series": "app-do-entregador",
+      "series_position": 10,
+      "source_file": "Tutoriais Help Entregadores/10 Registrar Problema na entrega.jpeg",
+      "media": "entregador-registrar-problema-na-entrega.jpeg",
+      "last_content_update": "2026-09-01",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 210,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-registrar-problema-na-entrega.jpg"
+    },
+    {
+      "slug": "entregador-prioridade-expressa-e-super-expressa",
+      "title": "Prioridade: Super Expressa e Expressa",
+      "description": "Diferença entre Super Expressa (prazo até 40 min, prioridade total) e Expressa (prazo até 1h30), e o aviso para identificar a prioridade no modal do pedido.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "prazos-e-prioridades",
+      "content_type": "image",
+      "source_file": "Tutoriais Help Entregadores/Prioridade Expressa e Super Expressa.jpeg",
+      "media": "entregador-prioridade-expressa-e-super-expressa.jpeg",
+      "last_content_update": "2026-09-11",
+      "date_source": "data do arquivo na pasta do Drive",
+      "sort_order": 220,
+      "is_featured": false,
+      "needs_update": false,
+      "needs_review": false,
+      "thumbnail": "entregador-prioridade-expressa-e-super-expressa.jpg"
+    },
+    {
+      "slug": "entregador-adiantamento-pelo-app",
+      "title": "Adiantamento pelo app",
+      "description": "Passo a passo para solicitar adiantamento de pagamento pelo app e tabela do que pode ser antecipado em cada dia da semana.",
+      "audiences": [
+        "entregadores"
+      ],
+      "category": "pagamentos-e-taxas",
+      "content_type": "pdf",
+      "pages": 4,
+      "source_file": "Tutoriais Help Entregadores/Tutorial_Adiantamento_Help.pdf",
+      "media": "entregador-adiantamento-pelo-app.pdf",
+      "last_content_update": "2026-07-10",
+      "date_source": "metadado do PDF",
+      "needs_review": true,
+      "review_note": "O Guia rápido (01/09/2026) diz que não há adiantamento aos sábados, domingos e feriados; este tutorial (10/07/2026) diz que pedidos no fim de semana são processados no próximo dia útil. Confirmar a regra vigente.",
+      "sort_order": 230,
+      "is_featured": false,
+      "needs_update": false,
+      "thumbnail": "entregador-adiantamento-pelo-app.jpg"
+    }
+  ]
+}
