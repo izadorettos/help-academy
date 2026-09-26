@@ -23,6 +23,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https:",
+      "media-src 'self' blob: https:",
       `frame-src 'self' ${frameSrcDomains}`,
       "frame-ancestors 'none'",
       "object-src 'none'",
