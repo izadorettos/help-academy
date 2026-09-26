@@ -11,6 +11,7 @@ import {
   BarChart3,
   Settings,
   ArrowLeft,
+  LifeBuoy,
 } from 'lucide-react'
 
 const ADMIN_NAV = [
@@ -19,6 +20,7 @@ const ADMIN_NAV = [
   { href: '/admin/areas', label: 'Áreas', icon: Building2, exact: false },
   { href: '/admin/trilhas', label: 'Trilhas', icon: BookOpen, exact: false },
   { href: '/admin/conteudos', label: 'Conteúdos', icon: FileText, exact: false },
+  { href: '/admin/tutoriais', label: 'Tutoriais', icon: LifeBuoy, exact: false },
   { href: '/admin/relatorios', label: 'Relatórios', icon: BarChart3, exact: false },
   { href: '/admin/configuracoes', label: 'Configurações', icon: Settings, exact: false },
 ]
