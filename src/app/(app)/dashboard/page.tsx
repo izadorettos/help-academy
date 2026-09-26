@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BookOpen, LayoutDashboard, Play } from 'lucide-react'
+import { BookOpen, LayoutDashboard, Play, LifeBuoy } from 'lucide-react'
 import { requireUser } from '@/lib/auth/guards'
 import { getUserPaths, getOverallProgress, getLastStartedLesson } from '@/features/learning/queries'
 import { getProfile } from '@/features/profile/queries'
 import { getRecentAchievements } from '@/features/gamification/queries'
+import { getRecentTutorials } from '@/features/help/queries'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ProgressBar } from '@/components/ui/progress-bar'
@@ -12,8 +13,10 @@ import { ProgressRing } from '@/components/ui/progress-ring'
 import { EmptyState } from '@/components/ui/empty-state'
 import { LevelBadge } from '@/components/gamification/level-badge'
 import { AchievementIcon } from '@/components/gamification/achievement-icon'
+import { formatDate } from '@/components/help/tutorial-card'
 import type { PathStatus, UserPath } from '@/features/learning/queries'
 import type { RecentAchievement } from '@/features/gamification/queries'
+import type { TutorialListItem } from '@/features/help/queries'
 
 export const metadata: Metadata = { title: 'Dashboard — Help Academy' }
 
@@ -100,17 +103,38 @@ function RecentAchievementCard({ achievement }: { achievement: RecentAchievement
   )
 }
 
+// ─── Recent tutorial card ─────────────────────────────────────────────────────
+
+function RecentTutorialCard({ tutorial }: { tutorial: TutorialListItem }) {
+  return (
+    <Link href={`/ajuda/${tutorial.slug}`} className="block focus:outline-none">
+      <Card interactive className="p-4 flex items-start gap-3">
+        <div className="bg-brand-soft text-brand rounded-full p-2 shrink-0 mt-0.5">
+          <LifeBuoy className="size-4" aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium leading-snug line-clamp-2">{tutorial.title}</p>
+          <p className="font-mono text-xs text-text-subtle mt-1">
+            Atualizado em {formatDate(tutorial.last_content_update)}
+          </p>
+        </div>
+      </Card>
+    </Link>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
   const user = await requireUser()
 
-  const [paths, overall, lastLesson, profile, recentAchievements] = await Promise.all([
+  const [paths, overall, lastLesson, profile, recentAchievements, recentTutorials] = await Promise.all([
     getUserPaths(user.id),
     getOverallProgress(user.id),
     getLastStartedLesson(user.id),
     getProfile(user.id),
     getRecentAchievements(user.id, 3),
+    getRecentTutorials(3),
   ])
 
   return (
@@ -217,6 +241,31 @@ export default async function DashboardPage() {
               </span>
             </Card>
           </Link>
+        </section>
+      )}
+
+      {/* ── Recent tutorials ── */}
+      {recentTutorials.length > 0 && (
+        <section aria-label="Materiais atualizados recentemente">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-h3 font-semibold flex items-center gap-2">
+              <LifeBuoy className="size-5 text-brand" aria-hidden />
+              Materiais atualizados recentemente
+            </h2>
+            <Link
+              href="/ajuda"
+              className="text-sm font-medium text-brand hover:underline underline-offset-2"
+            >
+              Ver Central de Ajuda
+            </Link>
+          </div>
+          <ul className="grid gap-3 sm:grid-cols-3" aria-label="Tutoriais recentes">
+            {recentTutorials.map((tut) => (
+              <li key={tut.id}>
+                <RecentTutorialCard tutorial={tut} />
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
