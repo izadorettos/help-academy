@@ -19,7 +19,8 @@
     "db:types": "npx supabase gen types typescript --local > src/types/database.types.ts",
     "demo:seed": "node scripts/demo.mjs seed",
     "demo:reset": "node scripts/demo.mjs reset",
-    "demo:remove": "node scripts/demo.mjs remove"
+    "demo:remove": "node scripts/demo.mjs remove",
+    "tutorials:import": "node scripts/import-tutorials.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
