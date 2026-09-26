@@ -290,10 +290,10 @@ for (const tut of catalog.tutorials) {
   // Upload thumbnail
   let thumbnailUrl = null
   if (tut.thumbnail) {
-    const localThumb   = join(resolvedMedia, 'thumbnails', tut.thumbnail)
-    // fallback: try root of mediaDir
-    const localThumb2  = join(resolvedMedia, tut.thumbnail)
-    const thumbLocal   = existsSync(localThumb) ? localThumb : localThumb2
+    const localThumb   = join(resolvedMedia, 'capas', tut.thumbnail)
+    const localThumb2  = join(resolvedMedia, 'thumbnails', tut.thumbnail)
+    const localThumb3  = join(resolvedMedia, tut.thumbnail)
+    const thumbLocal   = existsSync(localThumb) ? localThumb : existsSync(localThumb2) ? localThumb2 : localThumb3
     const thumbStorage = `${tut.slug}/cover${extname(tut.thumbnail)}`
     const result = await uploadFile(thumbLocal, thumbStorage)
     if (result) {
