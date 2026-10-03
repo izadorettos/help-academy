@@ -80,3 +80,36 @@ export interface AuthProvider {
 8. **Política de sessão e segurança:** tempo de expiração, MFA obrigatório, logout único, restrição por IP/rede, requisitos de LGPD e de armazenamento de dados.
 9. **Senha:** primeiro acesso, troca e recuperação acontecem sempre no ambiente HELP? Qual URL devemos indicar?
 10. **Operação:** limites de uso da API, disponibilidade esperada, janela de manutenção e contato técnico responsável pela integração.
+
+---
+
+## 5. Implementação: login pela API do Core da HELP (03/10/2026)
+
+O ambiente HELP é o **Core** (NestJS, `repo/Core`), que expõe login por API. Foi adotado o caminho **"Login próprio da HELP exposto por API"** da seção 1. Ativação: `AUTH_PROVIDER=help`.
+
+**Fluxo** (`src/lib/auth/providers/help.ts`, `help-core.ts`, `core-jwt.ts`):
+1. A página `/login` exibe o **Cloudflare Turnstile** (obrigatório). O botão "Entrar" só habilita com o token; após cada tentativa o widget é renovado (o token é de uso único).
+2. O Server Action envia `{ email, senha, captchaToken }` à **rota pública** `POST /usuario/login` do Core. Sem token, o Core nem é chamado. O Core valida o captcha (com `TURNSTILE_SECRET_KEY`) antes da senha.
+   - O Core recusa entregadores nessa rota (403, já depois do captcha); nesse caso o Academy tenta `POST /entregador/login`.
+3. O **accessToken (JWT) devolvido é validado no servidor do Academy**: algoritmo HS256 (rejeita `none` e outros), assinatura com `HELP_CORE_JWT_SECRET` (= `JWT_SECRET` do Core), expiração (tolerância de 60 s) e email igual ao do login. **Email e perfil vêm das claims assinadas** (`email`, `tipo`), não do corpo da resposta. O token do Core não é armazenado.
+4. O Academy localiza o perfil por `(auth_provider='help', external_subject=<id do usuário no Core>)`; se não houver, por email (vincula contas criadas antes da integração e preserva o progresso); se não houver, cria o usuário no Supabase Auth (`email_confirm: true`, sem senha).
+5. A cada login são sincronizados email, nome e **role**: `tipo = Administrador` → `admin`; demais perfis (`Analista`, `Gestor`, `Estabelecimento`, `Afiliado`, `PessoaFisica`, `Entregador`) → `member`.
+6. A sessão Supabase é aberta no servidor (`auth.admin.generateLink('magiclink')` + `verifyOtp`), gravando os cookies normais. RLS, RPCs e o `proxy.ts` continuam iguais.
+
+**Regras**
+- A senha não é armazenada no Academy. Perfis com `active = false` não entram, mesmo com login válido no Core.
+- Erros para a pessoa são genéricos ("Login ou senha inválidos.", "Confirme que você não é um robô…" ou "tente novamente"); o motivo do Core vai para o log do servidor.
+- Capacidades: `passwordReset` e `invites` desligados — senha e cadastro são geridos no Core.
+- CSP (`next.config.ts`): `https://challenges.cloudflare.com` liberado em `script-src` e `frame-src`.
+- `/login` é renderizada por requisição (`connection()`), então a site key é lida em runtime.
+
+**Variáveis** (`.env.example`, todas obrigatórias com `AUTH_PROVIDER=help`): `HELP_CORE_API_URL`, `HELP_CORE_JWT_SECRET` (somente servidor), `HELP_TURNSTILE_SITE_KEY` (pública, a mesma do Front).
+
+**Atenção**
+- O Turnstile só é de fato validado se o Core tiver `TURNSTILE_SECRET_KEY` (sem ela o `TurnstileService` do Core aprova qualquer token). O Academy não pode validá-lo por conta própria: o token é de uso único e é consumido pelo Core.
+- `HELP_CORE_JWT_SECRET` é o segredo que assina **todos** os tokens do Core: quem o tiver consegue emitir tokens válidos para o Core. Guardar só no servidor/gerenciador de segredos.
+
+**Pendências**
+- O painel admin ainda oferece "Convidar usuário" (Supabase) mesmo com `AUTH_PROVIDER=help`; não usa `capabilities.invites`.
+- Área (`department_id`) não vem do Core; continua definida pelo admin no Academy.
+- Desligamento: quem for desativado/deletado no Core deixa de conseguir entrar, mas a sessão já aberta vale até expirar (`jwt_expiry`).

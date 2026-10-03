@@ -13,7 +13,8 @@ export const config = {
      * - _next/image (imagens otimizadas)
      * - favicon.ico, robots.txt, sitemap.xml
      * - arquivos com extensão (ex.: .png, .svg, .js)
+     * - api/health (probes do Kubernetes; não toca no Supabase)
      */
-    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\..*).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|api/health$|.*\\..*).*)',
   ],
 }

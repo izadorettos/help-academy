@@ -10,6 +10,8 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
   const parsed = signInSchema.safeParse({
     login: formData.get('login'),
     password: formData.get('password'),
+    // Nome do campo que o widget do Cloudflare Turnstile injeta no formulário.
+    captchaToken: formData.get('cf-turnstile-response') ?? undefined,
   })
   if (!parsed.success) return { error: 'Login ou senha inválidos.' }
 
