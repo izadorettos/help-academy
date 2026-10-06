@@ -47,6 +47,7 @@ export function TutorialCard({ tutorial, thumbnailUrl, backUrl }: TutorialCardPr
     ? `/ajuda/${tutorial.slug}?back=${encodeURIComponent(backUrl)}`
     : `/ajuda/${tutorial.slug}`
 
+  const coverUrl = thumbnailUrl ?? tutorial.thumbnail_signed_url ?? null
   const freshRecently = isRecentlyUpdated(tutorial.last_content_update)
   const typeLabel = CONTENT_TYPE_LABEL[tutorial.content_type] ?? tutorial.content_type
 
@@ -58,9 +59,10 @@ export function TutorialCard({ tutorial, thumbnailUrl, backUrl }: TutorialCardPr
     >
       {/* Cover 16:9 */}
       <div className="relative aspect-video w-full overflow-hidden rounded-t-xl bg-surface-muted">
-        {thumbnailUrl ? (
+        {coverUrl ? (
           <Image
-            src={thumbnailUrl}
+            src={coverUrl}
+            unoptimized
             alt=""
             aria-hidden
             fill

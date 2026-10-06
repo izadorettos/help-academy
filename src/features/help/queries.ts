@@ -51,6 +51,8 @@ export interface TutorialListItem {
   audiences: TutorialAudience[]
   series: TutorialSeries | null
   series_position: number | null
+  /** Signed URL for the thumbnail (resolved server-side; null when unavailable). */
+  thumbnail_signed_url?: string | null
 }
 
 export interface TutorialDetail extends TutorialListItem {
@@ -153,6 +155,60 @@ const TUTORIAL_LIST_SELECT = `
   )
 `
 
+// ─── Helpers: retry + signed thumbnails ───────────────────────────────────────
+
+/**
+ * Runs a Supabase query, retrying once on error (cold start / transient network).
+ * Without this, a transient failure silently rendered an empty tutorial list.
+ */
+async function withRetry<T extends { error: { message: string } | null }>(
+  run: () => PromiseLike<T>,
+  label: string,
+): Promise<T> {
+  const first = await run()
+  if (!first.error) return first
+  console.error(`[${label}] error (retrying):`, first.error.message)
+  await new Promise((r) => setTimeout(r, 400))
+  return run()
+}
+
+/** Signs all storage thumbnails of a tutorial list in a single batch call. */
+async function attachSignedThumbnails(items: TutorialListItem[]): Promise<TutorialListItem[]> {
+  const byBucket = new Map<string, Array<{ item: TutorialListItem; path: string }>>()
+  for (const item of items) {
+    const raw = item.thumbnail_url
+    if (!raw) { item.thumbnail_signed_url = null; continue }
+    if (!raw.startsWith('storage:')) { item.thumbnail_signed_url = raw; continue }
+    const [bucket, ...rest] = raw.slice('storage:'.length).split('/')
+    if (!bucket || rest.length === 0) { item.thumbnail_signed_url = null; continue }
+    const list = byBucket.get(bucket) ?? []
+    list.push({ item, path: rest.join('/') })
+    byBucket.set(bucket, list)
+  }
+  if (byBucket.size === 0) return items
+
+  try {
+    const admin = createAdminClient()
+    await Promise.all(
+      [...byBucket.entries()].map(async ([bucket, entries]) => {
+        const { data, error } = await admin.storage
+          .from(bucket)
+          .createSignedUrls(entries.map((e) => e.path), 3600)
+        if (error || !data) {
+          console.error('[attachSignedThumbnails] error:', error?.message)
+          return
+        }
+        const signed = new Map(data.map((d) => [d.path, d.signedUrl]))
+        for (const e of entries) e.item.thumbnail_signed_url = signed.get(e.path) ?? null
+      }),
+    )
+  } catch (err) {
+    // Thumbnails are cosmetic — never break the list because of them.
+    console.error('[attachSignedThumbnails] failed:', err)
+  }
+  return items
+}
+
 // ─── getTutorials ─────────────────────────────────────────────────────────────
 
 export async function getTutorials(filters: TutorialFilters = {}): Promise<TutorialListItem[]> {
@@ -180,11 +236,11 @@ export async function getTutorials(filters: TutorialFilters = {}): Promise<Tutor
     query = query.eq('content_type', filters.type as TutorialContentType)
   }
 
-  const { data, error } = await query
+  const { data, error } = await withRetry(() => query, 'getTutorials')
 
   if (error) {
-    console.error('[getTutorials] error:', error.message)
-    return []
+    // Surface the failure (error boundary) instead of pretending there are no tutorials.
+    throw new Error(`[getTutorials] falha ao carregar tutoriais: ${error.message}`)
   }
 
   let items = (data ?? []).map(buildTutorialListItem)
@@ -208,7 +264,7 @@ export async function getTutorials(filters: TutorialFilters = {}): Promise<Tutor
     })
   }
 
-  return items
+  return attachSignedThumbnails(items)
 }
 
 // ─── getTutorial ──────────────────────────────────────────────────────────────
@@ -291,7 +347,7 @@ export async function getRelatedTutorials(
     return []
   }
 
-  return (data ?? []).map(buildTutorialListItem)
+  return attachSignedThumbnails((data ?? []).map(buildTutorialListItem))
 }
 
 // ─── getTutorialSignedUrl ─────────────────────────────────────────────────────
@@ -332,7 +388,7 @@ export async function getRecentTutorials(limit = 3): Promise<TutorialListItem[]>
     return []
   }
 
-  return (data ?? []).map(buildTutorialListItem)
+  return attachSignedThumbnails((data ?? []).map(buildTutorialListItem))
 }
 
 // ─── getAdminTutorialStats ────────────────────────────────────────────────────
@@ -405,11 +461,11 @@ export async function getAdminTutorials(filters: TutorialFilters = {}): Promise<
     query = query.eq('content_type', filters.type as TutorialContentType)
   }
 
-  const { data, error } = await query
+  const { data, error } = await withRetry(() => query, 'getAdminTutorials')
 
   if (error) {
-    console.error('[getAdminTutorials] error:', error.message)
-    return []
+    // Surface the failure (error boundary) instead of pretending there are no tutorials.
+    throw new Error(`[getAdminTutorials] falha ao carregar tutoriais: ${error.message}`)
   }
 
   let items = (data ?? []).map(buildTutorialListItem)
@@ -432,7 +488,7 @@ export async function getAdminTutorials(filters: TutorialFilters = {}): Promise<
     })
   }
 
-  return items
+  return attachSignedThumbnails(items)
 }
 
 // ─── getAudiences ─────────────────────────────────────────────────────────────

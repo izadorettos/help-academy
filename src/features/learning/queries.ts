@@ -89,40 +89,10 @@ export interface LastStartedLesson {
  * RLS ensures the user can only see paths they can access.
  */
 export async function getUserPaths(userId: string): Promise<UserPath[]> {
-  const supabase = await createServerClient()
-
-  // Query v_user_path_progress view — security_invoker=true means RLS applies.
-  // The view filters to paths the user can access (via can_access_path logic).
-  const { data, error } = await supabase
-    .from('v_user_path_progress' as never)
-    .select('*')
-    .eq('user_id', userId)
-    .order('position', { ascending: true })
-
-  if (error) {
-    // Fall back to raw query if view is not accessible (e.g., types not generated yet)
-    return getUserPathsFallback(userId)
-  }
-
-  if (!data || !Array.isArray(data)) return []
-
-  return (data as Record<string, unknown>[]).map((row) => ({
-    id: String(row['learning_path_id']),
-    title: String(row['title'] ?? ''),
-    description: row['description'] != null ? String(row['description']) : null,
-    slug: String(row['slug'] ?? ''),
-    coverUrl: row['cover_url'] != null ? String(row['cover_url']) : null,
-    required: Boolean(row['required']),
-    sequential: Boolean(row['sequential']),
-    position: Number(row['position'] ?? 0),
-    requiredTotal: Number(row['required_total'] ?? 0),
-    requiredDone: Number(row['required_done'] ?? 0),
-    percent: Number(row['percent'] ?? 0),
-    status: (row['status'] as PathStatus) ?? 'not_started',
-    startedAt: row['started_at'] != null ? String(row['started_at']) : null,
-    completedAt: row['completed_at'] != null ? String(row['completed_at']) : null,
-    lastAccessedAt: row['last_accessed_at'] != null ? String(row['last_accessed_at']) : null,
-  }))
+  // v_user_path_progress only exposes progress columns (no title/slug/position),
+  // so ordering/mapping by those columns failed with HTTP 400 on every load.
+  // Path metadata + progress are computed from the base tables (RLS applies).
+  return getUserPathsFallback(userId)
 }
 
 /**
