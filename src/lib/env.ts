@@ -17,8 +17,22 @@ export const serverEnvSchema = publicEnvSchema.extend({
   SUPABASE_SECRET_KEY: z.string().min(1),
 })
 
+/**
+ * Variáveis do provedor de login HELP (AUTH_PROVIDER=help).
+ * - HELP_CORE_JWT_SECRET (somente servidor): o mesmo JWT_SECRET do Core, para validar o
+ *   accessToken devolvido no login.
+ * - HELP_TURNSTILE_SITE_KEY: site key pública do Cloudflare Turnstile (a mesma do Front);
+ *   enviada ao navegador pela página de login.
+ */
+export const helpAuthEnvSchema = z.object({
+  HELP_CORE_API_URL: z.url({ protocol: /^https?$/ }),
+  HELP_CORE_JWT_SECRET: z.string().min(1),
+  HELP_TURNSTILE_SITE_KEY: z.string().min(1),
+})
+
 export type PublicEnv = z.infer<typeof publicEnvSchema>
 export type ServerEnv = z.infer<typeof serverEnvSchema>
+export type HelpAuthEnv = z.infer<typeof helpAuthEnvSchema>
 
 export class EnvValidationError extends Error {
   constructor(issues: string[]) {
@@ -45,6 +59,7 @@ export function parseEnv<S extends z.ZodType>(
 
 let cachedPublicEnv: PublicEnv | undefined
 let cachedServerEnv: ServerEnv | undefined
+let cachedHelpAuthEnv: HelpAuthEnv | undefined
 
 export function getPublicEnv(): PublicEnv {
   cachedPublicEnv ??= parseEnv(publicEnvSchema, {
@@ -63,4 +78,13 @@ export function getServerEnv(): ServerEnv {
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
   })
   return cachedServerEnv
+}
+
+export function getHelpAuthEnv(): HelpAuthEnv {
+  cachedHelpAuthEnv ??= parseEnv(helpAuthEnvSchema, {
+    HELP_CORE_API_URL: process.env.HELP_CORE_API_URL,
+    HELP_CORE_JWT_SECRET: process.env.HELP_CORE_JWT_SECRET,
+    HELP_TURNSTILE_SITE_KEY: process.env.HELP_TURNSTILE_SITE_KEY,
+  })
+  return cachedHelpAuthEnv
 }

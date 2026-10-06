@@ -1,15 +1,19 @@
 'use client'
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import Link from 'next/link'
 import { signIn, type SignInState } from '@/features/auth/actions'
-import type { AuthCapabilities } from '@/lib/auth'
+import type { AuthCapabilities, CaptchaConfig } from '@/lib/auth'
+import { TurnstileWidget } from './turnstile-widget'
 
 interface LoginFormProps {
   capabilities: AuthCapabilities
+  captcha: CaptchaConfig | null
 }
 
-export function LoginForm({ capabilities }: LoginFormProps) {
+export function LoginForm({ capabilities, captcha }: LoginFormProps) {
   const [state, action, pending] = useActionState<SignInState, FormData>(signIn, null)
+  const [hasCaptchaToken, setHasCaptchaToken] = useState(false)
+  const blocked = pending || (captcha !== null && !hasCaptchaToken)
 
   return (
     <form action={action} className="flex flex-col gap-4" noValidate>
@@ -32,7 +36,7 @@ export function LoginForm({ capabilities }: LoginFormProps) {
           type="text"
           required
           autoComplete="username"
-          className="border-border bg-surface text-text focus:border-focus rounded-lg border px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-focus/20"
+          className="border-border bg-surface text-text focus:border-focus focus:ring-focus/20 rounded-lg border px-3 py-2.5 text-base outline-none focus:ring-2"
           placeholder="seu.login"
         />
       </div>
@@ -55,15 +59,23 @@ export function LoginForm({ capabilities }: LoginFormProps) {
             type="password"
             required
             autoComplete="current-password"
-            className="border-border bg-surface text-text focus:border-focus rounded-lg border px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-focus/20"
+            className="border-border bg-surface text-text focus:border-focus focus:ring-focus/20 rounded-lg border px-3 py-2.5 text-base outline-none focus:ring-2"
             placeholder="••••••••"
           />
         </div>
       )}
 
+      {captcha && (
+        <TurnstileWidget
+          siteKey={captcha.siteKey}
+          resetKey={state}
+          onTokenChange={setHasCaptchaToken}
+        />
+      )}
+
       <button
         type="submit"
-        disabled={pending}
+        disabled={blocked}
         className="bg-brand text-on-brand hover:bg-brand-hover mt-2 flex min-h-11 items-center justify-center rounded-full px-5 font-medium transition-colors disabled:opacity-60"
       >
         {pending ? 'Entrando…' : 'Entrar'}

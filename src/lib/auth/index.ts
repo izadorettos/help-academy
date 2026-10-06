@@ -8,4 +8,11 @@ export function getAuthProvider(): AuthProvider {
   return supabaseProvider
 }
 
-export type { AuthProvider, Identity, AuthCapabilities, AuthResult } from './provider'
+export type {
+  AuthProvider,
+  Identity,
+  AuthCapabilities,
+  AuthResult,
+  CaptchaConfig,
+  SignInInput,
+} from './provider'

@@ -21,8 +21,7 @@ export const supabaseProvider: AuthProvider = {
     return {
       subject: user.id,
       email: user.email ?? null,
-      name:
-        ((user.user_metadata as Record<string, unknown>)?.name as string | null) ?? null,
+      name: ((user.user_metadata as Record<string, unknown>)?.name as string | null) ?? null,
     }
   },
   async signInWithPassword({ login, password }): Promise<AuthResult> {

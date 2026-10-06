@@ -1,0 +1,98 @@
+name: Build - DO LIVE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-app:
+    name: Build
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.E2_LIVE_GITBOT_CI_PAT }}
+
+      - name: 'Build and Push Docker Image'
+        run: |
+          echo "Gerando arquivos necessários para build"
+
+          cat <<EOF >> .env
+          ${{ vars.E3_LIVE_RUNTIME_ENV }}
+          EOF
+
+          if [ ! -s .env ]; then
+            echo "❌ Arquivo .env está vazio ou não existe!"
+            exit 1
+          fi
+
+          # NEXT_PUBLIC_* são embutidas no bundle durante o build: faltando, a imagem sai quebrada.
+          MISSING=""
+          for KEY in NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY \
+                     SUPABASE_SECRET_KEY AUTH_PROVIDER HELP_CORE_API_URL HELP_CORE_JWT_SECRET HELP_TURNSTILE_SITE_KEY; do
+            grep -Eq "^[[:space:]]*${KEY}=.+" .env || MISSING="$MISSING $KEY"
+          done
+          if [ -n "$MISSING" ]; then
+            echo "❌ Variáveis ausentes em vars.E3_LIVE_RUNTIME_ENV:$MISSING"
+            exit 1
+          fi
+          echo "✅ Arquivo .env válido"
+
+          echo "Iniciando build do projeto academy para o deploy no ambiente live"
+
+          # Criando tag com base no timestamp + short SHA
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          SHORT_SHA=${GITHUB_SHA::7}
+          IMAGE_TAG="live-${TIMESTAMP}-${SHORT_SHA}"
+
+          OWNER="${{ github.repository_owner }}"
+          OWNER_LOWER="${OWNER,,}"
+
+          REPO_NAME=$(basename "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "Repositório atual: $REPO_NAME"
+
+          IMAGE_NAME="ghcr.io/$OWNER_LOWER/$REPO_NAME/he-app-academy:${IMAGE_TAG}"
+
+          echo "📦 Construindo imagem: $IMAGE_NAME"
+          docker build -f .ci-build/live/Dockerfile -t "$IMAGE_NAME" .
+
+          echo "🚀 Enviando imagem para o GitHub Container Registry"
+          docker push "$IMAGE_NAME"
+
+          echo "IMAGE_VERSION=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: 'Atualizar repositório GitOps'
+        env:
+          GITOPS_REPO: ${{ vars.E2_LIVE_GITOPS_REPOSITORY_URL }}
+          GIT_PAT: ${{ secrets.E2_LIVE_GITBOT_CI_PAT }}
+        run: |
+          echo "Nova versão gerada: ${IMAGE_VERSION}"
+
+          AUTH_GITOPS_REPO=$(echo "$GITOPS_REPO" | sed "s|https://|https://$GIT_PAT@|")
+
+          echo "Clonando o repositório git-ops"
+          git clone "$AUTH_GITOPS_REPO" git-ops
+          cd git-ops
+
+          REPO_NAME=$(basename "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "Repositório atual: $REPO_NAME"
+
+          MANIFEST_PATH="$REPO_NAME/live/0_deployment.yaml"
+
+          echo "Atualizando o arquivo $MANIFEST_PATH com a nova imagem: ${IMAGE_VERSION}"
+          sed -i "s|\(image:[[:space:]]*\).*|\1${IMAGE_VERSION}|g" "$MANIFEST_PATH"
+
+          git config --global user.email "gitops-ci-bot@helentregas.com"
+          git config --global user.name "GITOPS-CI Bot"
+
+          git add "$MANIFEST_PATH"
+          git commit -m "Atualiza imagem para ${IMAGE_VERSION} no manifest $MANIFEST_PATH"
+          git push origin HEAD

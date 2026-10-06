@@ -1,0 +1,15 @@
+# O .env NÃO é ignorado: o workflow de deploy o gera antes do docker build.
+.git
+.github
+node_modules
+.next
+out
+coverage
+playwright-report
+test-results
+blob-report
+supabase/.temp
+supabase/.branches
+.env*.local
+*.log
+.DS_Store
